@@ -48,11 +48,33 @@ table {
   overflow: hidden;
 }
 
+.col-code {
+  width: 10%;
+  white-space: nowrap;
+}
+
+.col-date {
+  width: 15%;
+  white-space: nowrap;
+}
+
+.col-notes {
+  width: 35%;
+}
+
 th,
 td {
   padding: 10px;
   text-align: left;
   font-size: 14px;
+}
+
+tbody tr {
+  border-top: 1px solid #383838;
+}
+
+tbody tr:last-child {
+  border-bottom: none;
 }
 
 th {
@@ -99,7 +121,7 @@ button:hover {
   padding: 6px 10px;
   border-radius: 5px;
 
-  background-color: #f39c12;
+  background-color: #ffc465;
   color: #000;
 
   font-size: 13px;
@@ -107,7 +129,7 @@ button:hover {
 }
 
 .btn-edit:hover {
-  background-color: #d68910;
+  background-color: #ffad2a;
 }
 
 /* Clear search link */
@@ -140,7 +162,7 @@ button:hover {
 }
 .td-status-pending {
   color: white;
-  background-color: rgb(0, 149, 255);
+  background-color: rgb(100, 100, 100);
 }
 
 .td-status-processing {

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Edit Order {{ order.order_code }}</h2>
+
+  <form method="post" action="{{ url_for('update_order_template', order_code=order.order_code) }}">
+
+    <p><strong>Customer:</strong> {{ order.customer.name }}</p>
+    <p><strong>Email:</strong> {{ order.customer.email }}</p>
+
+    <!-- Status -->
+    <label>Status</label><br>
+    <select name="status">
+      <option value="pending" {% if order.status.value == "pending" %}selected{% endif %}>Pending</option>
+      <option value="processing" {% if order.status.value == "processing" %}selected{% endif %}>Processing</option>
+      <option value="completed" {% if order.status.value == "completed" %}selected{% endif %}>Completed</option>
+      <option value="cancelled" {% if order.status.value == "cancelled" %}selected{% endif %}>Cancelled</option>
+    </select>
+
+    <br><br>
+
+    <!-- Film -->
+    <label>Film Type</label><br>
+    <select name="film_type">
+      <option value="colour" {% if order.film_type.value == "colour" %}selected{% endif %}>Colour</option>
+      <option value="bw" {% if order.film_type.value == "bw" %}selected{% endif %}>Black & White</option>
+    </select>
+
+    <br><br>
+
+    <!-- Needs Print -->
+    <label>
+      <input
+        type="checkbox"
+        name="needs_print"
+        value="true"
+        {% if order.needs_print %}checked{% endif %}
+      >
+      Needs Print
+    </label>
+
+    <br><br>
+
+    <!-- Notes -->
+    <label>Notes</label><br>
+    <textarea name="notes" rows="5" cols="50">{{ order.notes or "" }}</textarea>
+
+    <br><br>
+
+    <button type="submit">Save</button>
+  </form>
+
+  <br>
+
+  <a href="{{ url_for('index') }}" class="clear-btn">Back</a>
+{% endblock %}

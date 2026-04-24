@@ -1,5 +1,7 @@
-from fastapi import FastAPI, Request, Depends
-from fastapi.responses import HTMLResponse
+# main.py
+from pathlib import Path
+from fastapi import FastAPI, Request, Depends, HTTPException, status, Form
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session, joinedload
@@ -7,7 +9,8 @@ from sqlalchemy.orm import Session, joinedload
 from api import models
 from api.database import engine, get_db
 from api.routers import orders, customers
-from pathlib import Path
+
+from frontend.routers import pages
 
 
 # uvicorn main:app --reload
@@ -24,6 +27,7 @@ app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
 
 app.include_router(orders.router, prefix="/api")
 app.include_router(customers.router, prefix="/api")
+app.include_router(pages.router)
 
 
 # @app.get("/")
@@ -33,34 +37,3 @@ app.include_router(customers.router, prefix="/api")
 #         name="index.html",
 #         context={}
 #     )
-
-
-@app.get("/", response_class=HTMLResponse)
-def index(
-    request: Request,
-    search: str | None = None,
-    db: Session = Depends(get_db),
-):
-    query = (
-        db.query(models.Order)
-        .options(joinedload(models.Order.customer))
-    )
-
-    if search:
-        search = search.strip()
-
-        query = query.filter(
-            (models.Order.order_code.ilike(f"%{search}%")) |
-            (models.Customer.email.ilike(f"%{search}%"))
-        ).join(models.Customer)
-
-    orders = query.order_by(models.Order.id.desc()).all()
-
-    return templates.TemplateResponse(
-        request=request,
-        name="index.html",
-        context={
-            "orders": orders,
-            "search": search
-        },
-    )
