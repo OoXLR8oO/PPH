@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>All Orders</h2>
+
+  <form method="get" action="/">
+    <input
+      type="search"
+      name="search"
+      placeholder="Search by order code or email..."
+      value="{{ search or '' }}"
+    />
+
+    <button type="submit">Search</button>
+
+    {% if search %}
+      <a class="clear-btn" href="/">Clear</a>
+    {% endif %}
+  </form>
+
+  {% if orders %}
+    <table>
+      <thead>
+        <tr>
+          <th>Order Code</th>
+          <th>Created At</th>
+          <th>Customer Name</th>
+          <th>Email</th>
+          <th>Film Type</th>
+          <th>Needs Print</th>
+          <th>Notes</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for order in orders %}
+          <tr>
+            <td>{{ order.order_code }}</td>
+
+            <td>{{ order.created_at }}</td>
+
+            <td>{{ order.customer.name }}</td>
+
+            <td>{{ order.customer.email }}</td>
+
+            <td>{{ order.film_type.value }}</td>
+
+            {% if order.needs_print %}
+              <td class="yes-print">Yes</td>
+            {% else %}
+              <td class="no-print">No</td>
+            {% endif %}
+
+            <td>
+              {% if order.notes %}
+                {{ order.notes }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+
+            <td class="td-status-{{ order.status.value }}">{{ order.status.value }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No orders found.</p>
+  {% endif %}
+{% endblock %}

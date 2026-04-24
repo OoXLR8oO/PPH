@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from api import models
 from api.database import engine, get_db
@@ -26,24 +26,24 @@ app.include_router(orders.router, prefix="/api")
 app.include_router(customers.router, prefix="/api")
 
 
-@app.get("/")
-def index(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="index.html",
-        context={}
-    )
+# @app.get("/")
+# def index(request: Request):
+#     return templates.TemplateResponse(
+#         request=request,
+#         name="index.html",
+#         context={}
+#     )
 
 
-@app.get("/orders-fragment", response_class=HTMLResponse)
-def orders_fragment(
+@app.get("/", response_class=HTMLResponse)
+def index(
     request: Request,
     search: str | None = None,
     db: Session = Depends(get_db),
 ):
     query = (
         db.query(models.Order)
-        .join(models.Customer)
+        .options(joinedload(models.Order.customer))
     )
 
     if search:
@@ -52,14 +52,15 @@ def orders_fragment(
         query = query.filter(
             (models.Order.order_code.ilike(f"%{search}%")) |
             (models.Customer.email.ilike(f"%{search}%"))
-        )
+        ).join(models.Customer)
 
     orders = query.order_by(models.Order.id.desc()).all()
 
     return templates.TemplateResponse(
-        name="partials/orders_list.html",
         request=request,
+        name="index.html",
         context={
-            "orders": orders
-        }
+            "orders": orders,
+            "search": search
+        },
     )

@@ -1,0 +1,159 @@
+/* Reset some default browser styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Base layout */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #f5f7fa;
+  color: #333;
+  padding: 20px;
+}
+
+/* Headings */
+h1 {
+  margin-bottom: 20px;
+}
+
+h2 {
+  margin-bottom: 10px;
+}
+
+h3 {
+  margin: 20px 0 10px;
+}
+
+/* Search input */
+input[type="search"] {
+  width: 100%;
+  max-width: 400px;
+  padding: 8px 10px;
+  margin-bottom: 15px;
+
+  border: 1px solid #ccc;
+  border-radius: 6px;
+
+  font-size: 14px;
+}
+
+/* Table layout */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th,
+td {
+  padding: 10px;
+  text-align: left;
+  font-size: 14px;
+}
+
+th {
+  color: black;
+  background-color: rgb(177, 177, 177);
+}
+
+td {
+  color: black;
+  background-color: rgb(235, 235, 235);
+}
+
+/* Select dropdown */
+select {
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 13px;
+}
+
+select:hover {
+  cursor: pointer;
+}
+
+/* Base button */
+button {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 13px;
+  cursor: pointer;
+
+  background-color: #acacac;
+  color: white;
+}
+
+button:hover {
+  background-color: #9a9a9a;
+}
+
+/* Edit button */
+.btn-edit {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 5px;
+
+  background-color: #f39c12;
+  color: #000;
+
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.btn-edit:hover {
+  background-color: #d68910;
+}
+
+/* Clear search link */
+.clear-btn {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 5px;
+
+  background-color: #3498db;
+  color: white;
+
+  font-size: 13px;
+  text-decoration: none;
+
+  margin-left: 6px;
+}
+
+.clear-btn:hover {
+  background-color: #2f86c2;
+}
+
+.yes-print {
+  color: white;
+  background-color: rgb(61, 166, 0);
+}
+
+.no-print {
+  color: white;
+  background-color: rgb(195, 0, 0);
+}
+.td-status-pending {
+  color: white;
+  background-color: rgb(0, 149, 255);
+}
+
+.td-status-processing {
+  color: white;
+  background-color: rgb(255, 166, 0);
+}
+
+.td-status-completed {
+  color: white;
+  background-color: rgb(61, 166, 0);
+}
+
+.td-status-cancelled {
+  color: white;
+  background-color: rgb(255, 60, 0);
+}

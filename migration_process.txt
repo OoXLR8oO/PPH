@@ -1,0 +1,2 @@
+alembic revision --autogenerate -m "updating tables in orders db"
+alembic upgrade head
