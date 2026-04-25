@@ -73,7 +73,7 @@ def edit_order_page(
 @router.post("/orders/{order_code}/edit")
 def update_order_template(
     order_code: str,
-    status_value: str | None = Form(None),
+    order_status: str | None = Form(None),
     film_type: str | None = Form(None),
     needs_print: str | None = Form(None),
     notes: str | None = Form(None),
@@ -89,8 +89,8 @@ def update_order_template(
             detail="Order not found"
         )
 
-    if status_value is not None:
-        order.status = OrderStatus(status_value)
+    if order_status is not None:
+        order.status = OrderStatus(order_status)
 
     if film_type is not None:
         order.film_type = FilmType(film_type)

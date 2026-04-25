@@ -10,7 +10,7 @@
 
     <!-- Status -->
     <label>Status</label><br>
-    <select name="status">
+    <select name="order_status">
       <option value="pending" {% if order.status.value == "pending" %}selected{% endif %}>Pending</option>
       <option value="processing" {% if order.status.value == "processing" %}selected{% endif %}>Processing</option>
       <option value="completed" {% if order.status.value == "completed" %}selected{% endif %}>Completed</option>

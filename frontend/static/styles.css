@@ -1,11 +1,11 @@
-/* Reset some default browser styles */
+/* Reset */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-/* Base layout */
+/* Layout */
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background-color: #f5f7fa;
@@ -14,16 +14,8 @@ body {
 }
 
 /* Headings */
-h1 {
-  margin-bottom: 20px;
-}
-
 h2 {
   margin-bottom: 10px;
-}
-
-h3 {
-  margin: 20px 0 10px;
 }
 
 /* Search input */
@@ -39,7 +31,7 @@ input[type="search"] {
   font-size: 14px;
 }
 
-/* Table layout */
+/* Table */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -48,6 +40,7 @@ table {
   overflow: hidden;
 }
 
+/* Column sizing */
 .col-code {
   width: 10%;
   white-space: nowrap;
@@ -59,9 +52,10 @@ table {
 }
 
 .col-notes {
-  width: 35%;
+  width: 30%;
 }
 
+/* Cells */
 th,
 td {
   padding: 10px;
@@ -69,25 +63,24 @@ td {
   font-size: 14px;
 }
 
+/* Row separation */
 tbody tr {
   border-top: 1px solid #383838;
 }
 
-tbody tr:last-child {
-  border-bottom: none;
-}
-
+/* Header */
 th {
   color: black;
   background-color: rgb(177, 177, 177);
 }
 
+/* Data cells */
 td {
   color: black;
   background-color: rgb(235, 235, 235);
 }
 
-/* Select dropdown */
+/* Select (used in edit page) */
 select {
   padding: 4px 6px;
   border-radius: 4px;
@@ -99,7 +92,7 @@ select:hover {
   cursor: pointer;
 }
 
-/* Base button */
+/* Buttons */
 button {
   padding: 6px 10px;
   border: none;
@@ -132,7 +125,7 @@ button:hover {
   background-color: #ffad2a;
 }
 
-/* Clear search link */
+/* Clear / Back button */
 .clear-btn {
   display: inline-block;
   padding: 6px 10px;
@@ -151,6 +144,7 @@ button:hover {
   background-color: #2f86c2;
 }
 
+/* Print status */
 .yes-print {
   color: white;
   background-color: rgb(61, 166, 0);
@@ -160,6 +154,8 @@ button:hover {
   color: white;
   background-color: rgb(195, 0, 0);
 }
+
+/* Order status */
 .td-status-pending {
   color: white;
   background-color: rgb(100, 100, 100);
@@ -177,5 +173,5 @@ button:hover {
 
 .td-status-cancelled {
   color: white;
-  background-color: rgb(255, 60, 0);
+  background-color: rgb(195, 0, 0);
 }
