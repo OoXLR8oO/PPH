@@ -230,3 +230,21 @@ button:active {
 .btn-add:hover {
   background-color: #27ae60;
 }
+
+.btn-delete {
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-delete:hover {
+  background-color: #c9302c;
+}
+
+.btn-delete:active {
+  transform: scale(0.98);
+}

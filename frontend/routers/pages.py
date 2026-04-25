@@ -184,3 +184,27 @@ def create_order_template(
         url="/?view=orders", 
         status_code=status.HTTP_303_SEE_OTHER
     )
+
+
+@router.post("/orders/{order_code}/delete")
+def delete_order_page(
+    order_code: str,
+    db: Session = Depends(get_db),
+):
+    order = db.query(models.Order).filter(
+        models.Order.order_code == order_code
+    ).first()
+
+    if not order:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Order not found"
+        )
+
+    db.delete(order)
+    db.commit()
+
+    return RedirectResponse(
+        url="/?view=orders",
+        status_code=status.HTTP_303_SEE_OTHER
+    )

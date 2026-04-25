@@ -52,5 +52,17 @@
 
   <br>
 
+  <form
+      method="post"
+      action="{{ url_for('delete_order_page', order_code=order.order_code) }}"
+      onsubmit="return confirm('Delete this order permanently? This cannot be undone.');"
+    >
+      <button type="submit" class="btn-delete">
+        Delete Order
+      </button>
+  </form>
+
+  <br>
+
   <a href="{{ url_for('index') }}" class="clear-btn">Back</a>
 {% endblock %}
