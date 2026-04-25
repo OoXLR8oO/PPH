@@ -49,6 +49,7 @@ class OrderCreate(BaseModel):
 
 
 class OrderResponse(BaseModel):
+    id: int
     order_code: str
     status: OrderStatus
     film_type: FilmType

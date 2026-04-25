@@ -108,6 +108,10 @@ button:hover {
   background-color: #9a9a9a;
 }
 
+button:active {
+  background-color: #818181;
+}
+
 /* Edit button */
 .btn-edit {
   display: inline-block;
@@ -174,4 +178,37 @@ button:hover {
 .td-status-cancelled {
   color: white;
   background-color: rgb(195, 0, 0);
+}
+
+/* Navigation bar */
+.nav-bar {
+  margin-top: 8px;
+  margin-bottom: 5px;
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
+  padding-bottom: 8px;
+}
+
+/* Nav buttons */
+.nav-btn {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-right: 6px;
+
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 13px;
+
+  background-color: #acacac;
+  color: white;
+}
+
+/* Hover */
+.nav-btn:hover {
+  background-color: #9a9a9a;
+}
+
+/* Active tab */
+.nav-btn.active {
+  background-color: #3498db;
 }

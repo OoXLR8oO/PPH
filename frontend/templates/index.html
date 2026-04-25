@@ -1,78 +1,39 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h2>All Orders</h2>
+  <div class="nav-bar">
+    <a href="{{ url_for('index') }}?view=orders"
+      class="nav-btn {% if view == 'orders' %}active{% endif %}">
+      Orders
+    </a>
+
+    <a href="{{ url_for('index') }}?view=customers"
+      class="nav-btn {% if view == 'customers' %}active{% endif %}">
+      Customers
+    </a>
+  </div>
 
   <form method="get" action="{{ url_for('index') }}">
+    <input type="hidden" name="view" value="{{ view }}">
     <input
       type="search"
       name="search"
-      placeholder="Search by order code or email..."
+      placeholder="{% if view == 'customers' %}Search by name or email...{% else %}Search by order code or email...{% endif %}"
       value="{{ search or '' }}"
     />
 
-    <button type="submit">Search</button>
+    <button class="btn-search" type="submit">Search</button>
 
     {% if search %}
-      <a class="clear-btn" href="{{ url_for('index') }}">Clear</a>
+      <a class="clear-btn" href="{{ url_for('index') }}?view={{ view }}">
+        Clear
+      </a>
     {% endif %}
   </form>
 
-  {% if orders %}
-    <table>
-      <thead>
-        <tr>
-          <th class="col-code">Order Code</th>
-          <th class="col-date">Created At</th>
-          <th>Customer Name</th>
-          <th>Email</th>
-          <th>Film Type</th>
-          <th>Needs Print</th>
-          <th class="col-notes">Notes</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        {% for order in orders %}
-          <tr>
-            <td>{{ order.order_code }}</td>
-
-            <td>{{ order.created_at }}</td>
-
-            <td>{{ order.customer.name }}</td>
-
-            <td>{{ order.customer.email }}</td>
-
-            <td>{{ order.film_type.value }}</td>
-
-            {% if order.needs_print %}
-              <td class="yes-print">Yes</td>
-            {% else %}
-              <td class="no-print">No</td>
-            {% endif %}
-
-            <td>
-              {% if order.notes %}
-                {{ order.notes }}
-              {% else %}
-                -
-              {% endif %}
-            </td>
-
-            <td class="td-status-{{ order.status.value }}">{{ order.status.value }}</td>
-
-            <td>
-              <a href="{{ url_for('edit_order_page', order_code=order.order_code) }}" class="btn-edit">
-                Edit
-              </a>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  {% if view == "customers" %}
+    {% include "partials/customers_table.html" %}
   {% else %}
-    <p>No orders found.</p>
+    {% include "partials/orders_table.html" %}
   {% endif %}
 {% endblock %}

@@ -1,3 +1,4 @@
+# frontend/routers/pages.py
 from fastapi import APIRouter, Request, Depends, Form, HTTPException, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -16,31 +17,47 @@ router = APIRouter(tags=["Pages"])
 @router.get("/", response_class=HTMLResponse)
 def index(
     request: Request,
+    view: str = "orders",
     search: str | None = None,
     db: Session = Depends(get_db),
 ):
-    query = (
-        db.query(models.Order)
-        .options(joinedload(models.Order.customer))
-    )
+    # Normalize once
+    search = search.strip() if search else None
 
-    if search:
-        search = search.strip()
+    context = {
+        "request": request,
+        "view": view,
+        "search": search,
+    }
 
-        query = query.join(models.Customer).filter(
-            (models.Order.order_code.ilike(f"%{search}%")) |
-            (models.Customer.email.ilike(f"%{search}%"))
+    if view == "customers":
+        query = db.query(models.Customer)
+
+        if search:
+            query = query.filter(
+                (models.Customer.name.ilike(f"%{search}%")) |
+                (models.Customer.email.ilike(f"%{search}%"))
+            )
+
+        context["customers"] = query.order_by(models.Customer.id.desc()).all()
+
+    else:  # orders view
+        query = db.query(models.Order).options(
+            joinedload(models.Order.customer)
         )
 
-    orders = query.order_by(models.Order.id.desc()).all()
+        if search:
+            query = query.join(models.Customer).filter(
+                (models.Order.order_code.ilike(f"%{search}%")) |
+                (models.Customer.email.ilike(f"%{search}%"))
+            )
+
+        context["orders"] = query.order_by(models.Order.id.desc()).all()
 
     return templates.TemplateResponse(
         request=request,
         name="index.html",
-        context={
-            "orders": orders,
-            "search": search
-        },
+        context=context,
     )
 
 
