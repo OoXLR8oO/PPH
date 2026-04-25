@@ -29,6 +29,12 @@
         Clear
       </a>
     {% endif %}
+
+    {% if view == "orders" %}
+      <a href="{{ url_for('create_order_page') }}" class="btn-add">
+        Create Order
+      </a>
+    {% endif %}
   </form>
 
   {% if view == "customers" %}

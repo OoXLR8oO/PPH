@@ -75,24 +75,22 @@ def get_order(order_code: str, db: Session = Depends(get_db)):
 @router.post("/", response_model=schemas.OrderResponse)
 def create_order(order: schemas.OrderCreate, db: Session = Depends(get_db)):
 
-    customer = (
-        db.query(models.Customer)
-        .filter(models.Customer.email == order.customer.email)
-        .first()
-    )
+    email = order.customer.email.strip().lower()
+
+    customer = db.query(models.Customer).filter(
+        models.Customer.email == email
+    ).first()
 
     if not customer:
         customer = models.Customer(
             name=order.customer.name,
-            email=order.customer.email,
+            email=email,
             phone=order.customer.phone,
             notes=order.customer.notes
         )
         db.add(customer)
-        db.commit()
-        db.refresh(customer)
+        db.flush()
 
-    # retry loop for safe order_code generation
     for _ in range(5):
         code = get_next_order_code(db)
 
@@ -113,12 +111,6 @@ def create_order(order: schemas.OrderCreate, db: Session = Depends(get_db)):
 
         except IntegrityError:
             db.rollback()
-            continue
-
-    raise HTTPException(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        detail="Failed to generate unique order code"
-    )
 
 
 @router.patch("/{order_code}", response_model=schemas.OrderResponse)

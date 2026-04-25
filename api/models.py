@@ -33,7 +33,7 @@ class Order(Base):
     order_code: Mapped[str] = mapped_column(
         String,
         unique=True,
-        default=lambda: str(uuid.uuid4())[:8]
+        nullable=False
     )
 
     status: Mapped[OrderStatus] = mapped_column(

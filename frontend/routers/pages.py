@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session, joinedload
 from api import models
 from api.database import get_db
 from api.enums import OrderStatus, FilmType
+from api.utils import get_next_order_code
 
 
 templates = Jinja2Templates(directory="frontend/templates")
@@ -121,5 +122,65 @@ def update_order_template(
 
     return RedirectResponse(
         url="/", 
+        status_code=status.HTTP_303_SEE_OTHER
+    )
+
+
+@router.get("/orders/new", response_class=HTMLResponse)
+def create_order_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="create_order.html",
+        context={
+            "request": request
+        }
+    )
+
+
+@router.post("/orders/new")
+def create_order_template(
+    customer_name: str = Form(...),
+    customer_email: str = Form(...),
+    customer_phone: str = Form(...),
+    customer_notes: str | None = Form(None),
+    film_type: str = Form(...),
+    needs_print: str | None = Form(None),
+    notes: str | None = Form(None),
+    db: Session = Depends(get_db),
+):
+    needs_print_bool = needs_print == "true"
+
+    email = customer_email.strip().lower()
+
+    customer = db.query(models.Customer).filter(
+        models.Customer.email == email
+    ).first()
+
+    if not customer:
+        customer = models.Customer(
+            name=customer_name,
+            email=email,
+            phone=customer_phone,
+            notes=customer_notes,
+        )
+        db.add(customer)
+        db.flush()
+
+    order_code = get_next_order_code(db)
+
+    order = models.Order(
+        order_code=order_code,
+        customer_id=customer.id,
+        film_type=film_type,
+        needs_print=needs_print_bool,
+        notes=notes,
+        status=OrderStatus.PENDING,
+    )
+
+    db.add(order)
+    db.commit()
+
+    return RedirectResponse(
+        url="/?view=orders", 
         status_code=status.HTTP_303_SEE_OTHER
     )

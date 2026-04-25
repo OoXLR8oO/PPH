@@ -18,7 +18,7 @@ def list_customers(
 
     email: str | None = None,
 ):
-    limit = min(limit, 10)
+    limit = min(limit, 100)
 
     query = db.query(models.Customer)
 

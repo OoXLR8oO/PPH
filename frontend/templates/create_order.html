@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Create Order</h2>
+
+  <form method="post" action="{{ url_for('create_order_template') }}">
+
+    <!-- Customer Info -->
+    <h3>Customer Details</h3>
+
+    <label>Name</label><br>
+    <input type="text" name="customer_name" required>
+
+    <br><br>
+
+    <label>Email</label><br>
+    <input type="email" name="customer_email" required>
+
+    <br><br>
+
+    <label>Phone</label><br>
+    <input type="text" name="customer_phone" required>
+
+    <br><br>
+
+    <label>Customer Notes</label><br>
+    <textarea name="customer_notes" rows="3"></textarea>
+
+    <br><br>
+
+    <!-- Order Info -->
+    <h3>Order Details</h3>
+
+    <label>Film Type</label><br>
+    <select name="film_type" required>
+      <option value="colour">Colour</option>
+      <option value="bw">Black & White</option>
+    </select>
+
+    <br><br>
+
+    <label>
+      <input type="checkbox" name="needs_print" value="true">
+      Needs Print
+    </label>
+
+    <br><br>
+
+    <label>Notes</label><br>
+    <textarea name="notes" rows="5"></textarea>
+
+    <br><br>
+
+    <button type="submit">Create Order</button>
+  </form>
+
+  <br>
+
+  <a href="{{ url_for('index') }}?view=orders" class="clear-btn">
+    Back
+  </a>
+{% endblock %}

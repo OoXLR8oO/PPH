@@ -13,15 +13,28 @@ def generate_unique_code(db: Session) -> str:
 
 
 def get_next_order_code(db: Session) -> str:
-    # Fetch all existing codes
     existing_codes = db.query(Order.order_code).all()
 
-    # Convert to a set of integers for fast lookup
-    used = {int(code[0]) for code in existing_codes}
+    used = set()
 
-    # Find the first available code
+    for (code,) in existing_codes:
+        if code.isdigit():
+            used.add(int(code))
+
     for i in range(10000):
         if i not in used:
             return f"{i:04d}"
 
     raise ValueError("All 4-digit order codes are in use")
+
+
+# def get_next_order_code(db: Session) -> str:
+#     existing_codes = db.query(Order.order_code).all()
+
+#     used = {int(code) for (code,) in existing_codes}
+
+#     for i in range(10000):
+#         if i not in used:
+#             return f"{i:04d}"
+
+#     raise ValueError("All 4-digit order codes are in use")
