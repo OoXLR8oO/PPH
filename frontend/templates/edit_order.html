@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
+  <script src="{{ url_for('static', path='js/edit_order.js') }}"></script>
+
   <h2>Edit Order {{ order.order_code }}</h2>
 
-  <form method="post" action="{{ url_for('update_order_template', order_code=order.order_code) }}">
+  <form id="edit-form" data-order-code="{{ order.order_code }}">
 
     <p><strong>Customer:</strong> {{ order.customer.name }}</p>
     <p><strong>Email:</strong> {{ order.customer.email }}</p>
@@ -48,18 +50,17 @@
     <br><br>
 
     <button type="submit">Save</button>
-  </form>
 
-  <br>
+    <br><br>
 
-  <form
-      method="post"
-      action="{{ url_for('delete_order_page', order_code=order.order_code) }}"
-      onsubmit="return confirm('Delete this order permanently? This cannot be undone.');"
+    <button 
+      type="button"
+      id="delete-btn"
+      data-order-code="{{ order.order_code }}"
+      class="btn-delete"
     >
-      <button type="submit" class="btn-delete">
-        Delete Order
-      </button>
+      Delete Order
+    </button>
   </form>
 
   <br>
