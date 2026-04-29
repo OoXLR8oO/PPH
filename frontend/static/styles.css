@@ -5,7 +5,7 @@
   padding: 0;
 }
 
-/* Layout */
+/* Base */
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background-color: #f5f7fa;
@@ -13,21 +13,18 @@ body {
   padding: 20px;
 }
 
-/* Headings */
 h2 {
   margin-bottom: 10px;
 }
 
-/* Search input */
+/* Inputs */
 input[type="search"] {
   width: 100%;
   max-width: 400px;
   padding: 8px 10px;
   margin-bottom: 15px;
-
   border: 1px solid #ccc;
   border-radius: 6px;
-
   font-size: 14px;
 }
 
@@ -40,107 +37,69 @@ table {
   overflow: hidden;
 }
 
-/* Column sizing */
-.col-code {
-  width: 10%;
-  white-space: nowrap;
-}
+.col-code { width: 10%; white-space: nowrap; }
+.col-date { width: 15%; white-space: nowrap; }
+.col-notes { width: 30%; }
 
-.col-date {
-  width: 15%;
-  white-space: nowrap;
-}
-
-.col-notes {
-  width: 30%;
-}
-
-/* Cells */
-th,
-td {
+th, td {
   padding: 10px;
   text-align: left;
   font-size: 14px;
 }
 
-/* Row separation */
 tbody tr {
   border-top: 1px solid #383838;
 }
 
-/* Header */
 th {
-  color: black;
-  background-color: rgb(177, 177, 177);
+  background-color: #b1b1b1;
 }
 
-/* Data cells */
 td {
-  color: black;
-  background-color: rgb(235, 235, 235);
+  background-color: #ebebeb;
 }
 
-/* Select (used in edit page) */
+/* Forms */
 select {
   padding: 4px 6px;
   border-radius: 4px;
   border: 1px solid #ccc;
   font-size: 13px;
-}
-
-select:hover {
   cursor: pointer;
 }
 
-/* Buttons */
-button {
-  padding: 6px 10px;
-  border: none;
-  border-radius: 5px;
-  font-size: 13px;
-  cursor: pointer;
-
-  background-color: #acacac;
-  color: white;
-}
-
-button:hover {
-  background-color: #9a9a9a;
-}
-
-button:active {
-  background-color: #818181;
-}
-
-/* Edit button */
-.btn-edit {
+/* Shared button base */
+.btn {
   display: inline-block;
   padding: 6px 10px;
   border-radius: 5px;
-
-  background-color: #ffc465;
-  color: #000;
-
   font-size: 13px;
   text-decoration: none;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+
+/* Default button */
+button {
+  background-color: #acacac;
+}
+
+button:hover { background-color: #9a9a9a; }
+button:active { background-color: #818181; }
+
+/* Variants */
+.btn-edit {
+  background-color: #ffc465;
+  color: #000;
 }
 
 .btn-edit:hover {
   background-color: #ffad2a;
 }
 
-/* Clear / Back button */
 .clear-btn {
-  display: inline-block;
-  padding: 6px 10px;
-  border-radius: 5px;
-
   background-color: #3498db;
-  color: white;
-
-  font-size: 13px;
-  text-decoration: none;
-
   margin-left: 6px;
 }
 
@@ -148,82 +107,8 @@ button:active {
   background-color: #2f86c2;
 }
 
-/* Print status */
-.yes-print {
-  color: white;
-  background-color: rgb(61, 166, 0);
-}
-
-.no-print {
-  color: white;
-  background-color: rgb(195, 0, 0);
-}
-
-/* Order status */
-.td-status-pending {
-  color: white;
-  background-color: rgb(100, 100, 100);
-}
-
-.td-status-processing {
-  color: white;
-  background-color: rgb(255, 166, 0);
-}
-
-.td-status-completed {
-  color: white;
-  background-color: rgb(61, 166, 0);
-}
-
-.td-status-cancelled {
-  color: white;
-  background-color: rgb(195, 0, 0);
-}
-
-/* Navigation bar */
-.nav-bar {
-  margin-top: 8px;
-  margin-bottom: 5px;
-  border-top: 1px solid #ddd;
-  padding-top: 10px;
-  padding-bottom: 8px;
-}
-
-/* Nav buttons */
-.nav-btn {
-  display: inline-block;
-  padding: 6px 12px;
-  margin-right: 6px;
-
-  border-radius: 5px;
-  text-decoration: none;
-  font-size: 13px;
-
-  background-color: #acacac;
-  color: white;
-}
-
-/* Hover */
-.nav-btn:hover {
-  background-color: #9a9a9a;
-}
-
-/* Active tab */
-.nav-btn.active {
-  background-color: #3498db;
-}
-
 .btn-add {
-  display: inline-block;
-  padding: 6px 12px;
-  border-radius: 5px;
-
   background-color: #2ecc71;
-  color: white;
-
-  font-size: 13px;
-  text-decoration: none;
-
   margin-left: 6px;
 }
 
@@ -233,8 +118,6 @@ button:active {
 
 .btn-delete {
   background-color: #d9534f;
-  color: white;
-  border: none;
   font-weight: bold;
 }
 
@@ -244,4 +127,47 @@ button:active {
 
 .btn-delete:active {
   transform: scale(0.98);
+}
+
+/* Status badges */
+.yes-print,
+.td-status-completed {
+  background-color: #3da600;
+  color: white;
+}
+
+.no-print,
+.td-status-cancelled {
+  background-color: #c30000;
+  color: white;
+}
+
+.td-status-pending {
+  background-color: #646464;
+  color: white;
+}
+
+.td-status-processing {
+  background-color: #ffa600;
+  color: white;
+}
+
+/* Navigation */
+.nav-bar {
+  margin: 8px 0 5px;
+  border-top: 1px solid #ddd;
+  padding: 10px 0 8px;
+}
+
+.nav-btn {
+  background-color: #acacac;
+  margin-right: 6px;
+}
+
+.nav-btn:hover {
+  background-color: #9a9a9a;
+}
+
+.nav-btn.active {
+  background-color: #3498db;
 }

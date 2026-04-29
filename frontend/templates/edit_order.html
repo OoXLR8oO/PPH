@@ -49,7 +49,7 @@
 
     <br><br>
 
-    <button type="submit">Save</button>
+    <button class="btn" type="submit">Save</button>
 
     <br><br>
 
@@ -57,7 +57,7 @@
       type="button"
       id="delete-btn"
       data-order-code="{{ order.order_code }}"
-      class="btn-delete"
+      class="btn btn-delete"
     >
       Delete Order
     </button>
@@ -65,5 +65,5 @@
 
   <br>
 
-  <a href="{{ url_for('index') }}" class="clear-btn">Back</a>
+  <a href="{{ url_for('index') }}" class="btn clear-btn">Back</a>
 {% endblock %}
