@@ -1,13 +1,11 @@
 # main.py
 from pathlib import Path
-from fastapi import FastAPI, Request, Depends, HTTPException, status, Form
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session, joinedload
 
 from api import models
-from api.database import engine, get_db
+from api.database import engine
 from api.routers import orders, customers
 
 from frontend.routers import pages

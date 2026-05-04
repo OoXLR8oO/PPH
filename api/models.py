@@ -1,5 +1,4 @@
 # api/models.py
-import uuid
 from datetime import datetime, timezone
 from sqlalchemy import DateTime
 from sqlalchemy import String, ForeignKey, Enum, Boolean, Text
