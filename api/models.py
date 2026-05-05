@@ -11,13 +11,17 @@ from api.enums import FilmType, OrderStatus
 class Customer(Base):
     __tablename__ = "customers"
 
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
-    email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+    email: Mapped[str] = mapped_column(String, nullable=False, unique=True, index=True)
     phone: Mapped[str] = mapped_column(String, nullable=False)
-    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text)
 
-    orders: Mapped[list[Order]] = relationship("Order", back_populates="customer")
+    orders: Mapped[list[Order]] = relationship(
+        "Order", 
+        back_populates="customer", 
+        cascade="all, delete-orphan"
+    )
 
     @validates("email")
     def normalize_email(self, key, value):

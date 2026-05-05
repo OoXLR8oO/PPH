@@ -1,7 +1,9 @@
 # frontend/routers/pages.py
+
 from fastapi import APIRouter, Request, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
 from api import models
@@ -20,7 +22,6 @@ def index(
     search: str | None = None,
     db: Session = Depends(get_db),
 ):
-    # Normalize once
     search = search.strip() if search else None
 
     context = {
@@ -30,28 +31,32 @@ def index(
     }
 
     if view == "customers":
-        query = db.query(models.Customer)
+        stmt = select(models.Customer)
 
         if search:
-            query = query.filter(
+            stmt = stmt.where(
                 (models.Customer.name.ilike(f"%{search}%")) |
                 (models.Customer.email.ilike(f"%{search}%"))
             )
 
-        context["customers"] = query.order_by(models.Customer.id.desc()).all()
+        stmt = stmt.order_by(models.Customer.id.desc())
 
-    else:  # orders view
-        query = db.query(models.Order).options(
+        context["customers"] = db.execute(stmt).scalars().all()
+
+    else:
+        stmt = select(models.Order).options(
             joinedload(models.Order.customer)
         )
 
         if search:
-            query = query.join(models.Customer).filter(
+            stmt = stmt.join(models.Customer).where(
                 (models.Order.order_code.ilike(f"%{search}%")) |
                 (models.Customer.email.ilike(f"%{search}%"))
             )
 
-        context["orders"] = query.order_by(models.Order.id.desc()).all()
+        stmt = stmt.order_by(models.Order.id.desc())
+
+        context["orders"] = db.execute(stmt).scalars().all()
 
     return templates.TemplateResponse(
         request=request,
@@ -66,23 +71,27 @@ def edit_order_page(
     order_code: str,
     db: Session = Depends(get_db),
 ):
-    order = (
-        db.query(models.Order)
+    stmt = (
+        select(models.Order)
         .options(joinedload(models.Order.customer))
-        .filter(models.Order.order_code == order_code)
-        .first()
+        .where(models.Order.order_code == order_code)
     )
+
+    order = db.execute(stmt).scalars().first()
 
     if not order:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Order not found"
         )
 
     return templates.TemplateResponse(
         request=request,
         name="edit_order.html",
-        context={"order": order}
+        context={
+            "request": request,
+            "order": order
+        }
     )
 
 

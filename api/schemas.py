@@ -1,7 +1,7 @@
 # api/schemas.py
 from datetime import datetime, timezone as dt_timezone
 from pytz import timezone
-from pydantic import BaseModel, EmailStr, field_serializer, field_validator
+from pydantic import BaseModel, EmailStr, field_serializer, field_validator, ConfigDict
 
 from api.enums import FilmType, OrderStatus
 
@@ -25,8 +25,9 @@ class CustomerResponse(BaseModel):
     phone: str
     notes: str | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True
+    )
 
 
 class CustomerUpdate(BaseModel):
@@ -66,8 +67,9 @@ class OrderResponse(BaseModel):
         local_time = value.astimezone(timezone("Australia/Melbourne"))
         return local_time.strftime("%d-%m-%Y %H:%M:%S")
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True
+    )
 
 
 class OrderUpdate(BaseModel):

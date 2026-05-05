@@ -1,5 +1,7 @@
 # api/routers/customers.py
+
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -14,36 +16,34 @@ router = APIRouter(prefix="/customers", tags=["Customers"])
 def list_customers(
     skip: int = 0,
     limit: int = 50,
-    db: Session = Depends(get_db),
-
     email: str | None = None,
+    db: Session = Depends(get_db),
 ):
     limit = min(limit, 100)
 
-    query = db.query(models.Customer)
+    stmt = select(models.Customer)
 
-    if email is not None:
-        query = query.filter(models.Customer.email == email.lower())
+    if email:
+        stmt = stmt.where(models.Customer.email == email.lower())
 
-    customers = (
-        query
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+    stmt = stmt.offset(skip).limit(limit)
+
+    customers = db.execute(stmt).scalars().all()
 
     return customers
 
 
 @router.get("/{customer_id}", response_model=schemas.CustomerResponse)
 def get_customer_by_id(customer_id: int, db: Session = Depends(get_db)):
-    customer = db.query(models.Customer).filter(
+    stmt = select(models.Customer).where(
         models.Customer.id == customer_id
-    ).first()
+    )
+
+    customer = db.execute(stmt).scalars().first()
 
     if not customer:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Customer not found"
         )
 
@@ -53,13 +53,13 @@ def get_customer_by_id(customer_id: int, db: Session = Depends(get_db)):
 @router.post("/", response_model=schemas.CustomerResponse)
 def create_customer(
     customer: schemas.CustomerCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     new_customer = models.Customer(
         name=customer.name,
         email=customer.email,
         phone=customer.phone,
-        notes=customer.notes
+        notes=customer.notes,
     )
 
     db.add(new_customer)
@@ -73,7 +73,7 @@ def create_customer(
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Customer with this email already exists"
+            detail="Customer with this email already exists",
         )
 
 
@@ -81,11 +81,13 @@ def create_customer(
 def update_customer(
     customer_id: int,
     payload: schemas.CustomerUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
-    customer = db.query(models.Customer).filter(
+    stmt = select(models.Customer).where(
         models.Customer.id == customer_id
-    ).first()
+    )
+
+    customer = db.execute(stmt).scalars().first()
 
     if not customer:
         raise HTTPException(
@@ -93,14 +95,11 @@ def update_customer(
             detail="Customer not found"
         )
 
-    if payload.name is not None:
-        customer.name = payload.name
+    # Cleaner partial update pattern
+    update_data = payload.model_dump(exclude_unset=True)
 
-    if payload.email is not None:
-        customer.email = payload.email
-
-    if payload.phone is not None:
-        customer.phone = payload.phone
+    for field, value in update_data.items():
+        setattr(customer, field, value)
 
     db.commit()
     db.refresh(customer)
@@ -110,12 +109,17 @@ def update_customer(
 
 @router.delete("/{customer_id}")
 def delete_customer(customer_id: int, db: Session = Depends(get_db)):
-    customer = db.query(models.Customer).filter(
+    stmt = select(models.Customer).where(
         models.Customer.id == customer_id
-    ).first()
+    )
+
+    customer = db.execute(stmt).scalars().first()
 
     if not customer:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Customer not found"
+        )
 
     db.delete(customer)
     db.commit()

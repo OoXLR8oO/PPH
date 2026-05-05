@@ -1,5 +1,7 @@
 # api/routers/orders.py
+
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
@@ -25,47 +27,45 @@ def list_orders(
 ):
     limit = min(limit, 100)
 
-    query = (
-        db.query(models.Order)
+    stmt = (
+        select(models.Order)
         .join(models.Customer)
         .options(joinedload(models.Order.customer))
     )
 
     if status is not None:
-        query = query.filter(models.Order.status == status)
+        stmt = stmt.where(models.Order.status == status)
 
     if needs_print is not None:
-        query = query.filter(models.Order.needs_print == needs_print)
+        stmt = stmt.where(models.Order.needs_print == needs_print)
 
-    if name is not None:
-        query = query.filter(models.Customer.name.ilike(f"%{name}%"))
+    if name:
+        stmt = stmt.where(models.Customer.name.ilike(f"%{name}%"))
 
     if email:
         if exact_email:
-            query = query.filter(models.Customer.email == email)
+            stmt = stmt.where(models.Customer.email == email.lower())
         else:
-            query = query.filter(models.Customer.email.ilike(f"%{email}%"))
+            stmt = stmt.where(models.Customer.email.ilike(f"%{email}%"))
 
-    return (
-        query.order_by(models.Order.id.desc())
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+    stmt = stmt.order_by(models.Order.id.desc()).offset(skip).limit(limit)
+
+    return db.execute(stmt).scalars().all()
 
 
 @router.get("/{order_code}", response_model=schemas.OrderResponse)
 def get_order(order_code: str, db: Session = Depends(get_db)):
-    order = (
-        db.query(models.Order)
+    stmt = (
+        select(models.Order)
         .options(joinedload(models.Order.customer))
-        .filter(models.Order.order_code == order_code)
-        .first()
+        .where(models.Order.order_code == order_code)
     )
+
+    order = db.execute(stmt).scalars().first()
 
     if not order:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Order not found"
         )
 
@@ -77,9 +77,11 @@ def create_order(order: schemas.OrderCreate, db: Session = Depends(get_db)):
 
     email = order.customer.email.strip().lower()
 
-    customer = db.query(models.Customer).filter(
+    # Find existing customer
+    customer_stmt = select(models.Customer).where(
         models.Customer.email == email
-    ).first()
+    )
+    customer = db.execute(customer_stmt).scalars().first()
 
     if not customer:
         customer = models.Customer(
@@ -89,8 +91,9 @@ def create_order(order: schemas.OrderCreate, db: Session = Depends(get_db)):
             notes=order.customer.notes
         )
         db.add(customer)
-        db.flush()
+        db.flush()  # get customer.id without commit
 
+    # Retry logic for unique order_code
     for _ in range(5):
         code = get_next_order_code(db)
 
@@ -112,6 +115,12 @@ def create_order(order: schemas.OrderCreate, db: Session = Depends(get_db)):
         except IntegrityError:
             db.rollback()
 
+    # If all retries fail
+    raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="Failed to generate unique order code"
+    )
+
 
 @router.patch("/{order_code}", response_model=schemas.OrderResponse)
 def update_order(
@@ -119,12 +128,13 @@ def update_order(
     payload: schemas.OrderUpdate,
     db: Session = Depends(get_db),
 ):
-    order = (
-        db.query(models.Order)
+    stmt = (
+        select(models.Order)
         .options(joinedload(models.Order.customer))
-        .filter(models.Order.order_code == order_code)
-        .first()
+        .where(models.Order.order_code == order_code)
     )
+
+    order = db.execute(stmt).scalars().first()
 
     if not order:
         raise HTTPException(
@@ -132,17 +142,10 @@ def update_order(
             detail="Order not found"
         )
 
-    if payload.status is not None:
-        order.status = payload.status
+    update_data = payload.model_dump(exclude_unset=True)
 
-    if payload.film_type is not None:
-        order.film_type = payload.film_type
-
-    if payload.needs_print is not None:
-        order.needs_print = payload.needs_print
-
-    if payload.notes is not None:
-        order.notes = payload.notes
+    for field, value in update_data.items():
+        setattr(order, field, value)
 
     db.commit()
     db.refresh(order)
@@ -152,13 +155,15 @@ def update_order(
 
 @router.delete("/{order_code}")
 def delete_order(order_code: str, db: Session = Depends(get_db)):
-    order = db.query(models.Order).filter(
+    stmt = select(models.Order).where(
         models.Order.order_code == order_code
-    ).first()
+    )
+
+    order = db.execute(stmt).scalars().first()
 
     if not order:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Order not found"
         )
 
