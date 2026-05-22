@@ -1,13 +1,15 @@
 # main.py
+from contextlib import asynccontextmanager
 from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from api import models
 from api.database import engine
-from api.routers import orders, customers
 
+from api.routers import customers, orders
 from frontend.routers import pages
 
 
@@ -15,9 +17,18 @@ from frontend.routers import pages
 
 BASE_DIR = Path(__file__).resolve().parent
 
-app = FastAPI()
 
-models.Base.metadata.create_all(bind=engine)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with engine.begin() as conn:
+        await conn.run_sync(models.Base.metadata.create_all)
+
+    yield
+
+    await engine.dispose()
+
+
+app = FastAPI(lifespan=lifespan)
 
 templates = Jinja2Templates(directory="frontend/templates")
 

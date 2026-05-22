@@ -1,9 +1,8 @@
-# api/routers/orders.py
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from api import models, schemas
 from api.database import get_db
@@ -15,7 +14,7 @@ router = APIRouter(prefix="/orders", tags=["Orders"])
 
 
 @router.get("/", response_model=list[schemas.OrderResponse])
-def list_orders(
+async def list_orders(
     status: OrderStatus | None = None,
     needs_print: bool | None = None,
     name: str | None = None,
@@ -23,7 +22,7 @@ def list_orders(
     exact_email: bool = False,
     skip: int = 0,
     limit: int = 50,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     limit = min(limit, 100)
 
@@ -50,83 +49,14 @@ def list_orders(
 
     stmt = stmt.order_by(models.Order.id.desc()).offset(skip).limit(limit)
 
-    return db.execute(stmt).scalars().all()
+    result = await db.execute(stmt)
+    return result.scalars().all()
 
 
 @router.get("/{order_code}", response_model=schemas.OrderResponse)
-def get_order(order_code: str, db: Session = Depends(get_db)):
-    stmt = (
-        select(models.Order)
-        .options(joinedload(models.Order.customer))
-        .where(models.Order.order_code == order_code)
-    )
-
-    order = db.execute(stmt).scalars().first()
-
-    if not order:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Order not found"
-        )
-
-    return order
-
-
-@router.post("/", response_model=schemas.OrderResponse)
-def create_order(order: schemas.OrderCreate, db: Session = Depends(get_db)):
-
-    email = order.customer.email.strip().lower()
-
-    # Find existing customer
-    customer_stmt = select(models.Customer).where(
-        models.Customer.email == email
-    )
-    customer = db.execute(customer_stmt).scalars().first()
-
-    if not customer:
-        customer = models.Customer(
-            name=order.customer.name,
-            email=email,
-            phone=order.customer.phone,
-            notes=order.customer.notes
-        )
-        db.add(customer)
-        db.flush()  # get customer.id without commit
-
-    # Retry logic for unique order_code
-    for _ in range(5):
-        code = get_next_order_code(db)
-
-        new_order = models.Order(
-            order_code=code,
-            customer_id=customer.id,
-            film_type=order.film_type,
-            needs_print=order.needs_print,
-            notes=order.notes
-        )
-
-        db.add(new_order)
-
-        try:
-            db.commit()
-            db.refresh(new_order)
-            return new_order
-
-        except IntegrityError:
-            db.rollback()
-
-    # If all retries fail
-    raise HTTPException(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        detail="Failed to generate unique order code"
-    )
-
-
-@router.patch("/{order_code}", response_model=schemas.OrderResponse)
-def update_order(
+async def get_order(
     order_code: str,
-    payload: schemas.OrderUpdate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     stmt = (
         select(models.Order)
@@ -134,12 +64,95 @@ def update_order(
         .where(models.Order.order_code == order_code)
     )
 
-    order = db.execute(stmt).scalars().first()
+    result = await db.execute(stmt)
+    order = result.scalars().first()
 
     if not order:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Order not found"
+            detail="Order not found",
+        )
+
+    return order
+
+
+@router.post("/", response_model=schemas.OrderResponse)
+async def create_order(
+    order: schemas.OrderCreate,
+    db: AsyncSession = Depends(get_db),
+):
+    email = order.customer.email.strip().lower()
+
+    customer_stmt = select(models.Customer).where(
+        models.Customer.email == email
+    )
+
+    result = await db.execute(customer_stmt)
+    customer = result.scalars().first()
+
+    if not customer:
+        customer = models.Customer(
+            name=order.customer.name,
+            email=email,
+            phone=order.customer.phone,
+            notes=order.customer.notes,
+        )
+        
+        db.add(customer)
+        await db.flush()
+
+    for _ in range(5):
+        code = await get_next_order_code(db)
+
+        new_order = models.Order(
+            order_code=code,
+            customer_id=customer.id,
+            film_type=order.film_type,
+            needs_print=order.needs_print,
+            notes=order.notes,
+        )
+
+        db.add(new_order)
+
+        try:
+            await db.commit()
+
+            result = await db.execute(
+                select(models.Order)
+                .options(joinedload(models.Order.customer))
+                .where(models.Order.id == new_order.id)
+            )
+
+            return result.scalars().first()
+
+        except IntegrityError:
+            await db.rollback()
+
+    raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="Failed to generate unique order code",
+    )
+
+
+@router.patch("/{order_code}", response_model=schemas.OrderResponse)
+async def update_order(
+    order_code: str,
+    payload: schemas.OrderUpdate,
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = (
+        select(models.Order)
+        .options(joinedload(models.Order.customer))
+        .where(models.Order.order_code == order_code)
+    )
+
+    result = await db.execute(stmt)
+    order = result.scalars().first()
+
+    if not order:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Order not found",
         )
 
     update_data = payload.model_dump(exclude_unset=True)
@@ -147,27 +160,31 @@ def update_order(
     for field, value in update_data.items():
         setattr(order, field, value)
 
-    db.commit()
-    db.refresh(order)
+    await db.commit()
+    await db.refresh(order)
 
     return order
 
 
 @router.delete("/{order_code}")
-def delete_order(order_code: str, db: Session = Depends(get_db)):
+async def delete_order(
+    order_code: str,
+    db: AsyncSession = Depends(get_db),
+):
     stmt = select(models.Order).where(
         models.Order.order_code == order_code
     )
 
-    order = db.execute(stmt).scalars().first()
+    result = await db.execute(stmt)
+    order = result.scalars().first()
 
     if not order:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Order not found"
+            detail="Order not found",
         )
 
-    db.delete(order)
-    db.commit()
+    await db.delete(order)
+    await db.commit()
 
     return {"message": "Order deleted"}
