@@ -2,12 +2,11 @@
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
+from api.config import settings
 
-DATABASE_URL = "sqlite+aiosqlite:///./orders.db"
 
 engine = create_async_engine(
-    url=DATABASE_URL, 
-    connect_args={"check_same_thread": False}
+    url=settings.database_url, 
 )
 
 

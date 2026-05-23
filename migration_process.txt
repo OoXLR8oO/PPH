@@ -1,2 +1,4 @@
-alembic revision --autogenerate -m "updating tables in orders db"
-alembic upgrade head
+uv run alembic init -t async alembic
+uv run alembic revision --autogenerate -m "updating models"
+uv run alembic upgrade head
+uv run alembic current

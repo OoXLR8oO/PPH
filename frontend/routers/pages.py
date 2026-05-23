@@ -1,8 +1,6 @@
 # frontend/routers/pages.py
-
 from fastapi import APIRouter, Request, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,8 +9,8 @@ from sqlalchemy.orm import joinedload
 from api import models
 from api.database import get_db
 
+from frontend.templates_config import templates
 
-templates = Jinja2Templates(directory="frontend/templates")
 
 router = APIRouter(tags=["Pages"])
 
