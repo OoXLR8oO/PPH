@@ -107,3 +107,32 @@ async def create_order_page(request: Request):
             "request": request,
         },
     )
+
+
+@router.get("/customers/{customer_id}/edit", response_class=HTMLResponse)
+async def edit_customer_page(
+    request: Request,
+    customer_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = select(models.Customer).where(
+        models.Customer.id == customer_id
+    )
+
+    result = await db.execute(stmt)
+    customer = result.scalars().first()
+
+    if not customer:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Customer not found",
+        )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="edit_customer.html",
+        context={
+            "request": request,
+            "customer": customer,
+        },
+    )

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <script src="{{ url_for('static', path='js/edit_customer.js') }}"></script>
+
+  <h2>Edit Customer {{ customer.name }}</h2>
+
+  <form id="edit-form" data-customer-id="{{ customer.id }}">
+
+    <p><strong>Name:</strong> {{ customer.name }}</p>
+    <p><strong>Email:</strong> {{ customer.email }}</p>
+
+    <!-- Name -->
+    <label>Name</label><br>
+    <input type="text" name="name" value="{{ customer.name }}">
+
+    <br><br>
+
+    <!-- Email -->
+    <label>Email</label><br>
+    <input type="email" name="email" value="{{ customer.email }}">
+
+    <br><br>
+
+    <!-- Phone -->
+    <label>Phone</label><br>
+    <input type="text" name="phone" value="{{ customer.phone }}">
+
+    <br><br>
+
+    <!-- Notes -->
+    <label>Notes</label><br>
+    <textarea name="notes" rows="5" cols="50">{{ customer.notes or "" }}</textarea>
+
+    <br><br>
+
+    <button class="btn" type="submit">Save</button>
+
+    <br><br>
+
+    <button
+      type="button"
+      id="delete-btn"
+      data-customer-id="{{ customer.id }}"
+      class="btn btn-delete"
+    >
+      Delete Customer
+    </button>
+
+  </form>
+
+  <br>
+
+  <a href="{{ url_for('index') }}?view=customers" class="btn clear-btn">Back</a>
+{% endblock %}
