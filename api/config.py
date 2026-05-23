@@ -10,5 +10,8 @@ class Settings(BaseSettings):
     database_url: str
     frontend_url: str = "http://localhost:8000"
 
+    admin_username: str
+    admin_password: str
+
 
 settings = Settings() # type: ignore[call-arg] # Loaded from .env file

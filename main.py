@@ -4,10 +4,12 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
+from starlette.middleware.sessions import SessionMiddleware
+
 from api.database import engine
 from api.routers import customers, orders
 
-from frontend.routers import pages
+from frontend.routers import pages, auth
 
 
 # uvicorn main:app --reload
@@ -22,17 +24,14 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+app.add_middleware(
+    SessionMiddleware,
+    secret_key="change-this-to-a-long-random-string",
+)
+
 app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
 
 app.include_router(orders.router, prefix="/api")
 app.include_router(customers.router, prefix="/api")
 app.include_router(pages.router)
-
-
-# @app.get("/")
-# def index(request: Request):
-#     return templates.TemplateResponse(
-#         request=request,
-#         name="index.html",
-#         context={}
-#     )
+app.include_router(auth.router)

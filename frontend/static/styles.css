@@ -18,7 +18,10 @@ h2 {
 }
 
 /* Inputs */
-input[type="search"] {
+input[type="search"],
+input[type="text"],
+input[type="password"],
+input[type="email"] {
   width: 100%;
   max-width: 400px;
   padding: 8px 10px;
@@ -26,6 +29,18 @@ input[type="search"] {
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 14px;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
 }
 
 /* Table */

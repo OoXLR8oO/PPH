@@ -8,7 +8,18 @@
   </head>
 
   <body>
-    <h1>Film Processing Dashboard</h1>
+    <header class="top-bar">
+      <h1>Film Processing Dashboard</h1>
+
+      <div class="top-bar-right">
+        <form method="post" action="/logout">
+          <button type="submit" class="btn btn-delete">
+            Logout
+          </button>
+        </form>
+      </div>
+    </header>
+
     {% block content %}{% endblock %}
   </body>
 </html>

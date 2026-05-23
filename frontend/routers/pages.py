@@ -1,6 +1,6 @@
 # frontend/routers/pages.py
-from fastapi import APIRouter, Request, Depends, HTTPException, status
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Request, Depends, HTTPException, status, Form
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,6 +8,7 @@ from sqlalchemy.orm import joinedload
 
 from api import models
 from api.database import get_db
+from api.config import settings
 
 from frontend.templates_config import templates
 
@@ -15,9 +16,18 @@ from frontend.templates_config import templates
 router = APIRouter(tags=["Pages"])
 
 
+def require_auth(request: Request):
+    if not request.session.get("authenticated"):
+        raise HTTPException(
+            status_code=status.HTTP_303_SEE_OTHER,
+            headers={"Location": "/login"},
+        )
+
+
 @router.get("/", response_class=HTMLResponse)
 async def index(
     request: Request,
+    auth=Depends(require_auth),
     view: str = "orders",
     search: str | None = None,
     db: AsyncSession = Depends(get_db),
@@ -71,6 +81,7 @@ async def index(
 async def edit_order_page(
     request: Request,
     order_code: str,
+    auth=Depends(require_auth),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = (
@@ -99,7 +110,7 @@ async def edit_order_page(
 
 
 @router.get("/orders/new", response_class=HTMLResponse)
-async def create_order_page(request: Request):
+async def create_order_page(request: Request, auth=Depends(require_auth),):
     return templates.TemplateResponse(
         request=request,
         name="create_order.html",
@@ -113,6 +124,7 @@ async def create_order_page(request: Request):
 async def edit_customer_page(
     request: Request,
     customer_id: int,
+    auth=Depends(require_auth),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(models.Customer).where(
@@ -134,5 +146,16 @@ async def edit_customer_page(
         context={
             "request": request,
             "customer": customer,
+        },
+    )
+
+
+@router.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="login.html",
+        context={
+            "request": request,
         },
     )
