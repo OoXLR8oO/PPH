@@ -1,7 +1,8 @@
 # api/schemas.py
-from datetime import datetime, timezone as dt_timezone
+from datetime import UTC, datetime
+
+from pydantic import BaseModel, ConfigDict, EmailStr, field_serializer, field_validator
 from pytz import timezone
-from pydantic import BaseModel, EmailStr, field_serializer, field_validator, ConfigDict
 
 from api.enums import FilmType, OrderStatus
 
@@ -25,9 +26,7 @@ class CustomerResponse(BaseModel):
     phone: str
     notes: str | None = None
 
-    model_config = ConfigDict(
-        from_attributes=True
-    )
+    model_config = ConfigDict(from_attributes=True)
 
 
 class CustomerUpdate(BaseModel):
@@ -62,14 +61,12 @@ class OrderResponse(BaseModel):
     @field_serializer("created_at")
     def serialize_created_at(self, value: datetime):
         if value.tzinfo is None:
-            value = value.replace(tzinfo=dt_timezone.utc)
+            value = value.replace(tzinfo=UTC)
 
         local_time = value.astimezone(timezone("Australia/Melbourne"))
         return local_time.strftime("%d-%m-%Y %H:%M:%S")
 
-    model_config = ConfigDict(
-        from_attributes=True
-    )
+    model_config = ConfigDict(from_attributes=True)
 
 
 class OrderUpdate(BaseModel):

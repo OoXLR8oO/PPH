@@ -4,9 +4,8 @@ from sqlalchemy.orm import DeclarativeBase
 
 from api.config import settings
 
-
 engine = create_async_engine(
-    url=settings.database_url, 
+    url=settings.database_url,
 )
 
 

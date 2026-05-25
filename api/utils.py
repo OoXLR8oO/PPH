@@ -6,15 +6,9 @@ from api.models import Order
 
 
 async def get_next_order_code(db: AsyncSession) -> str:
-    result = await db.execute(
-        select(Order.order_code)
-    )
+    result = await db.execute(select(Order.order_code))
 
-    used = {
-        int(code)
-        for code in result.scalars()
-        if code.isdigit()
-    }
+    used = {int(code) for code in result.scalars() if code.isdigit()}
 
     for i in range(10000):
         if i not in used:

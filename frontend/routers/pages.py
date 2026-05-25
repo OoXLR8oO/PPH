@@ -1,17 +1,13 @@
 # frontend/routers/pages.py
-from fastapi import APIRouter, Request, Depends, HTTPException, status, Form
-from fastapi.responses import HTMLResponse, RedirectResponse
-
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.responses import HTMLResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from api import models
 from api.database import get_db
-from api.config import settings
-
 from frontend.templates_config import templates
-
 
 router = APIRouter(tags=["Pages"])
 
@@ -55,9 +51,7 @@ async def index(
         context["customers"] = result.scalars().all()
 
     else:
-        stmt = select(models.Order).options(
-            joinedload(models.Order.customer)
-        )
+        stmt = select(models.Order).options(joinedload(models.Order.customer))
 
         if search:
             stmt = stmt.join(models.Customer).where(
@@ -110,7 +104,10 @@ async def edit_order_page(
 
 
 @router.get("/orders/new", response_class=HTMLResponse)
-async def create_order_page(request: Request, auth=Depends(require_auth),):
+async def create_order_page(
+    request: Request,
+    auth=Depends(require_auth),
+):
     return templates.TemplateResponse(
         request=request,
         name="create_order.html",
@@ -127,9 +124,7 @@ async def edit_customer_page(
     auth=Depends(require_auth),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(models.Customer).where(
-        models.Customer.id == customer_id
-    )
+    stmt = select(models.Customer).where(models.Customer.id == customer_id)
 
     result = await db.execute(stmt)
     customer = result.scalars().first()

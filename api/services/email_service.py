@@ -1,8 +1,8 @@
-import smtplib
 import os
+import smtplib
 from email.message import EmailMessage
-from dotenv import load_dotenv
 
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -28,7 +28,7 @@ def send_email(to_email: str, subject: str, body: str):
     msg.set_content(body)
 
     with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as smtp:
-        #smtp.starttls()
+        # smtp.starttls()
         print(SMTP_HOST, SMTP_PORT)
         smtp.login(EMAIL_FROM, EMAIL_PASSWORD)
         smtp.send_message(msg)

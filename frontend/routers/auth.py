@@ -1,12 +1,11 @@
-from fastapi import APIRouter, Request, Form, status
+from fastapi import APIRouter, Form, Request, status
 from fastapi.responses import RedirectResponse
 
 from api.config import settings
-
 from frontend.templates_config import templates
 
-
 router = APIRouter(tags=["Auth"])
+
 
 @router.post("/login")
 async def login(
@@ -14,10 +13,7 @@ async def login(
     username: str = Form(),
     password: str = Form(),
 ):
-    if (
-        username != settings.admin_username
-        or password != settings.admin_password
-    ):
+    if username != settings.admin_username or password != settings.admin_password:
         return templates.TemplateResponse(
             request=request,
             name="login.html",

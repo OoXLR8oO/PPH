@@ -3,14 +3,11 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-
 from starlette.middleware.sessions import SessionMiddleware
 
 from api.database import engine
 from api.routers import customers, orders
-
-from frontend.routers import pages, auth
-
+from frontend.routers import auth, pages
 
 # uvicorn main:app --reload
 
@@ -18,7 +15,7 @@ from frontend.routers import pages, auth
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
-    
+
     await engine.dispose()
 
 

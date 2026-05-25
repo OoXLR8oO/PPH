@@ -14,4 +14,4 @@ class Settings(BaseSettings):
     admin_password: str
 
 
-settings = Settings() # type: ignore[call-arg] # Loaded from .env file
+settings = Settings()  # type: ignore[call-arg] # Loaded from .env file

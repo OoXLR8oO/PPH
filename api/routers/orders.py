@@ -6,9 +6,8 @@ from sqlalchemy.orm import joinedload
 
 from api import models, schemas
 from api.database import get_db
-from api.utils import get_next_order_code
 from api.enums import OrderStatus
-
+from api.utils import get_next_order_code
 
 router = APIRouter(prefix="/orders", tags=["Orders"])
 
@@ -83,9 +82,7 @@ async def create_order(
 ):
     email = order.customer.email.strip().lower()
 
-    customer_stmt = select(models.Customer).where(
-        models.Customer.email == email
-    )
+    customer_stmt = select(models.Customer).where(models.Customer.email == email)
 
     result = await db.execute(customer_stmt)
     customer = result.scalars().first()
@@ -97,7 +94,7 @@ async def create_order(
             phone=order.customer.phone,
             notes=order.customer.notes,
         )
-        
+
         db.add(customer)
         await db.flush()
 
@@ -171,9 +168,7 @@ async def delete_order(
     order_code: str,
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(models.Order).where(
-        models.Order.order_code == order_code
-    )
+    stmt = select(models.Order).where(models.Order.order_code == order_code)
 
     result = await db.execute(stmt)
     order = result.scalars().first()

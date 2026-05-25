@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api import models, schemas
 from api.database import get_db
 
-
 router = APIRouter(prefix="/customers", tags=["Customers"])
 
 
@@ -39,9 +38,7 @@ async def get_customer_by_id(
     customer_id: int,
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(models.Customer).where(
-        models.Customer.id == customer_id
-    )
+    stmt = select(models.Customer).where(models.Customer.id == customer_id)
 
     result = await db.execute(stmt)
     customer = result.scalars().first()
@@ -90,9 +87,7 @@ async def update_customer(
     payload: schemas.CustomerUpdate,
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(models.Customer).where(
-        models.Customer.id == customer_id
-    )
+    stmt = select(models.Customer).where(models.Customer.id == customer_id)
 
     result = await db.execute(stmt)
     customer = result.scalars().first()
@@ -119,9 +114,7 @@ async def delete_customer(
     customer_id: int,
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(models.Customer).where(
-        models.Customer.id == customer_id
-    )
+    stmt = select(models.Customer).where(models.Customer.id == customer_id)
 
     result = await db.execute(stmt)
     customer = result.scalars().first()
