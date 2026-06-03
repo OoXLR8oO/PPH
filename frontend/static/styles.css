@@ -7,7 +7,8 @@
 
 /* Base */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background-color: #f5f7fa;
   color: #333;
   padding: 20px;
@@ -52,11 +53,20 @@ table {
   overflow: hidden;
 }
 
-.col-code { width: 10%; white-space: nowrap; }
-.col-date { width: 15%; white-space: nowrap; }
-.col-notes { width: 30%; }
+.col-code {
+  width: 10%;
+  white-space: nowrap;
+}
+.col-date {
+  width: 15%;
+  white-space: nowrap;
+}
+.col-notes {
+  width: 30%;
+}
 
-th, td {
+th,
+td {
   padding: 10px;
   text-align: left;
   font-size: 14px;
@@ -100,8 +110,12 @@ button {
   background-color: #acacac;
 }
 
-button:hover { background-color: #9a9a9a; }
-button:active { background-color: #818181; }
+button:hover {
+  background-color: #9a9a9a;
+}
+button:active {
+  background-color: #818181;
+}
 
 /* Variants */
 .btn-edit {

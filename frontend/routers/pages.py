@@ -20,6 +20,10 @@ def require_auth(request: Request):
         )
 
 
+def is_authenticated(request: Request) -> bool:
+    return request.session.get("authenticated", False)
+
+
 @router.get("/", response_class=HTMLResponse)
 async def index(
     request: Request,
@@ -34,6 +38,7 @@ async def index(
         "request": request,
         "view": view,
         "search": search,
+        "is_authenticated": is_authenticated(request),
     }
 
     if view == "customers":
@@ -99,6 +104,7 @@ async def edit_order_page(
         context={
             "request": request,
             "order": order,
+            "is_authenticated": is_authenticated(request),
         },
     )
 
@@ -113,6 +119,7 @@ async def create_order_page(
         name="create_order.html",
         context={
             "request": request,
+            "is_authenticated": is_authenticated(request),
         },
     )
 
@@ -141,6 +148,7 @@ async def edit_customer_page(
         context={
             "request": request,
             "customer": customer,
+            "is_authenticated": is_authenticated(request),
         },
     )
 
@@ -152,5 +160,6 @@ async def login_page(request: Request):
         name="login.html",
         context={
             "request": request,
+            "is_authenticated": is_authenticated(request),
         },
     )

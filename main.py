@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
+from api.config import settings
 from api.database import engine
 from api.routers import customers, orders
 from frontend.routers import auth, pages
@@ -15,7 +16,6 @@ from frontend.routers import auth, pages
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
-
     await engine.dispose()
 
 
@@ -23,7 +23,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     SessionMiddleware,
-    secret_key="change-this-to-a-long-random-string",
+    secret_key=settings.secret_key,
 )
 
 app.mount("/static", StaticFiles(directory="frontend/static"), name="static")

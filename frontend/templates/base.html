@@ -12,11 +12,13 @@
       <h1>Film Processing Dashboard</h1>
 
       <div class="top-bar-right">
-        <form method="post" action="/logout">
-          <button type="submit" class="btn btn-delete">
-            Logout
-          </button>
-        </form>
+        {% if is_authenticated %}
+          <form method="post" action="/logout">
+            <button type="submit" class="btn btn-delete">
+              Logout
+            </button>
+          </form>
+        {% endif %}
       </div>
     </header>
 

@@ -13,5 +13,7 @@ class Settings(BaseSettings):
     admin_username: str
     admin_password: str
 
+    secret_key: str
+
 
 settings = Settings()  # type: ignore[call-arg] # Loaded from .env file
