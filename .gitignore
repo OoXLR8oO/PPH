@@ -25,5 +25,5 @@ wheels/
 # Environment Variables
 .env
 .env.docker
-*.env.test
+.env.test
 .vercel
