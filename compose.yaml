@@ -1,6 +1,7 @@
 services:
   app:
     build: .
+
     container_name: pph-app
 
     ports:
@@ -16,17 +17,16 @@ services:
 
   postgres:
     image: postgres:18
-
     container_name: pph-db
 
     env_file:
       - .env.docker
 
     ports:
-      - "5432:5432"
+      - "5432"
 
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
 
     restart: unless-stopped
 
