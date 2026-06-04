@@ -11,6 +11,7 @@ from api.routers import customers, orders
 from frontend.routers import auth, pages
 
 # uvicorn main:app --reload
+# docker compose up
 
 
 @asynccontextmanager
