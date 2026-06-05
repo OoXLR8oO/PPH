@@ -25,6 +25,8 @@ app = FastAPI(lifespan=lifespan)
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.secret_key,
+    max_age=1800,
+    https_only=True,
 )
 
 app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
