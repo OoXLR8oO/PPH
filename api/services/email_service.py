@@ -1,37 +1,16 @@
-import os
-import smtplib
-from email.message import EmailMessage
+import win32com.client
 
-from dotenv import load_dotenv
+ol = win32com.client.Dispatch("Outlook.Application")
 
-load_dotenv()
+olmailitem = 0x0
 
+newmail = ol.CreateItem(olmailitem)
+newmail.Subject = "Testing Custom Mail"
+newmail.To = "kartikpunna5@outlook.com"
 
-def require_env(name: str) -> str:
-    value = os.getenv(name)
-    if not value:
-        raise ValueError(f"Missing environment variable: {name}")
-    return value
+newmail.Body = """
+Hello, this is a test email to showcase how to send emails from Python and Outlook V3.
+"""
 
-
-EMAIL_FROM = require_env("EMAIL_FROM")
-EMAIL_PASSWORD = require_env("EMAIL_PASSWORD")
-SMTP_HOST = require_env("SMTP_HOST")
-SMTP_PORT = int(os.getenv("SMTP_PORT", 465))
-
-
-def send_email(to_email: str, subject: str, body: str):
-    msg = EmailMessage()
-    msg["Subject"] = subject
-    msg["From"] = EMAIL_FROM
-    msg["To"] = to_email
-    msg.set_content(body)
-
-    with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as smtp:
-        # smtp.starttls()
-        print(SMTP_HOST, SMTP_PORT)
-        smtp.login(EMAIL_FROM, EMAIL_PASSWORD)
-        smtp.send_message(msg)
-
-
-send_email("kartikpunna5@gmail.com", "Test Email", "This works")
+newmail.Display()
+newmail.Send()

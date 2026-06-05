@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     frontend_url: str = "http://localhost:8000"
 
     admin_username: str
-    admin_password: str
+    admin_password_hash: str
 
     secret_key: str
 

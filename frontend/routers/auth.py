@@ -2,6 +2,7 @@ from fastapi import APIRouter, Form, Request, status
 from fastapi.responses import RedirectResponse
 
 from api.config import settings
+from api.services.password_service import verify_password
 from frontend.templates_config import templates
 
 router = APIRouter(tags=["Auth"])
@@ -13,7 +14,14 @@ async def login(
     username: str = Form(),
     password: str = Form(),
 ):
-    if username != settings.admin_username or password != settings.admin_password:
+    valid_username = username == settings.admin_username
+
+    valid_password = verify_password(
+        password,
+        settings.admin_password_hash,
+    )
+
+    if not (valid_username and valid_password):
         return templates.TemplateResponse(
             request=request,
             name="login.html",
