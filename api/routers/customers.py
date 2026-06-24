@@ -1,12 +1,11 @@
 # api/routers/customers.py
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api import models, schemas
+from api import schemas
 from api.database import get_db
+from api.services import customers
 
 router = APIRouter(prefix="/customers", tags=["Customers"])
 
@@ -18,19 +17,7 @@ async def list_customers(
     email: str | None = None,
     db: AsyncSession = Depends(get_db),
 ):
-    limit = min(limit, 100)
-
-    stmt = select(models.Customer)
-
-    if email:
-        stmt = stmt.where(models.Customer.email == email.lower())
-
-    stmt = stmt.offset(skip).limit(limit)
-
-    result = await db.execute(stmt)
-    customers = result.scalars().all()
-
-    return customers
+    return await customers.list_customers(email, skip, limit, db)
 
 
 @router.get("/{customer_id}", response_model=schemas.CustomerResponse)
@@ -38,10 +25,7 @@ async def get_customer_by_id(
     customer_id: int,
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(models.Customer).where(models.Customer.id == customer_id)
-
-    result = await db.execute(stmt)
-    customer = result.scalars().first()
+    customer = await customers.get_customer_by_id(customer_id, db)
 
     if not customer:
         raise HTTPException(
@@ -57,24 +41,10 @@ async def create_customer(
     customer: schemas.CustomerCreate,
     db: AsyncSession = Depends(get_db),
 ):
-    new_customer = models.Customer(
-        name=customer.name,
-        email=customer.email,
-        phone=customer.phone,
-        notes=customer.notes,
-    )
-
-    db.add(new_customer)
-
     try:
-        await db.commit()
-        await db.refresh(new_customer)
+        return await customers.create_customer(customer, db)
 
-        return new_customer
-
-    except IntegrityError:
-        await db.rollback()
-
+    except customers.DuplicateCustomerError:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Customer with this email already exists",
@@ -87,24 +57,13 @@ async def update_customer(
     payload: schemas.CustomerUpdate,
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(models.Customer).where(models.Customer.id == customer_id)
-
-    result = await db.execute(stmt)
-    customer = result.scalars().first()
+    customer = await customers.update_customer(customer_id, payload, db)
 
     if not customer:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Customer not found",
         )
-
-    update_data = payload.model_dump(exclude_unset=True)
-
-    for field, value in update_data.items():
-        setattr(customer, field, value)
-
-    await db.commit()
-    await db.refresh(customer)
 
     return customer
 
@@ -114,18 +73,12 @@ async def delete_customer(
     customer_id: int,
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(models.Customer).where(models.Customer.id == customer_id)
+    deleted = await customers.delete_customer(customer_id, db)
 
-    result = await db.execute(stmt)
-    customer = result.scalars().first()
-
-    if not customer:
+    if not deleted:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Customer not found",
         )
-
-    await db.delete(customer)
-    await db.commit()
 
     return {"message": "Customer deleted"}
