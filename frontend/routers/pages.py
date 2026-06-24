@@ -1,12 +1,10 @@
 # frontend/routers/pages.py
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
 
-from api import models
 from api.database import get_db
+from api.services import pages
 from frontend.templates_config import templates
 
 router = APIRouter(tags=["Pages"])
@@ -32,42 +30,14 @@ async def index(
     search: str | None = None,
     db: AsyncSession = Depends(get_db),
 ):
-    search = search.strip() if search else None
+    context = await pages.get_index_data(view, search, db)
 
-    context = {
-        "request": request,
-        "view": view,
-        "search": search,
-        "is_authenticated": is_authenticated(request),
-    }
-
-    if view == "customers":
-        stmt = select(models.Customer)
-
-        if search:
-            stmt = stmt.where(
-                (models.Customer.name.ilike(f"%{search}%"))
-                | (models.Customer.email.ilike(f"%{search}%"))
-            )
-
-        stmt = stmt.order_by(models.Customer.id.desc())
-
-        result = await db.execute(stmt)
-        context["customers"] = result.scalars().all()
-
-    else:
-        stmt = select(models.Order).options(joinedload(models.Order.customer))
-
-        if search:
-            stmt = stmt.join(models.Customer).where(
-                (models.Order.order_code.ilike(f"%{search}%"))
-                | (models.Customer.email.ilike(f"%{search}%"))
-            )
-
-        stmt = stmt.order_by(models.Order.id.desc())
-
-        result = await db.execute(stmt)
-        context["orders"] = result.scalars().all()
+    context.update(
+        {
+            "request": request,
+            "is_authenticated": is_authenticated(request),
+        }
+    )
 
     return templates.TemplateResponse(
         request=request,
@@ -81,16 +51,9 @@ async def edit_order_page(
     request: Request,
     order_code: str,
     auth=Depends(require_auth),
-    db: AsyncSession = Depends(get_db),
+    db=Depends(get_db),
 ):
-    stmt = (
-        select(models.Order)
-        .options(joinedload(models.Order.customer))
-        .where(models.Order.order_code == order_code)
-    )
-
-    result = await db.execute(stmt)
-    order = result.scalars().first()
+    order = await pages.get_order_edit_page(order_code, db)
 
     if not order:
         raise HTTPException(
@@ -129,12 +92,9 @@ async def edit_customer_page(
     request: Request,
     customer_id: int,
     auth=Depends(require_auth),
-    db: AsyncSession = Depends(get_db),
+    db=Depends(get_db),
 ):
-    stmt = select(models.Customer).where(models.Customer.id == customer_id)
-
-    result = await db.execute(stmt)
-    customer = result.scalars().first()
+    customer = await pages.get_customer_edit_page(customer_id, db)
 
     if not customer:
         raise HTTPException(
