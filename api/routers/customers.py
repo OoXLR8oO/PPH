@@ -5,9 +5,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api import schemas
 from api.database import get_db
+from api.security import backend_auth
 from api.services import customers
 
-router = APIRouter(prefix="/customers", tags=["Customers"])
+router = APIRouter(
+    prefix="/customers",
+    tags=["Customers"],
+    dependencies=[Depends(backend_auth.require_auth)],
+)
 
 
 @router.get("/", response_model=list[schemas.CustomerResponse])

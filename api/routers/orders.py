@@ -1,12 +1,18 @@
+# api/routers/orders.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api import schemas
 from api.database import get_db
 from api.enums import OrderStatus
+from api.security import backend_auth
 from api.services import orders
 
-router = APIRouter(prefix="/orders", tags=["Orders"])
+router = APIRouter(
+    prefix="/orders",
+    tags=["Orders"],
+    dependencies=[Depends(backend_auth.require_auth)],
+)
 
 
 @router.get("/", response_model=list[schemas.OrderResponse])

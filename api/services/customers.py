@@ -1,4 +1,4 @@
-# api/services/customers_service.py
+# api/services/customers.py
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
