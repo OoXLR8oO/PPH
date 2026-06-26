@@ -5,17 +5,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api import schemas
 from api.database import get_db
 from api.enums import OrderStatus
-from api.security import backend_auth
 from api.services import orders
 
 router = APIRouter(
     prefix="/orders",
     tags=["Orders"],
-    dependencies=[Depends(backend_auth.require_auth)],
 )
 
 
-@router.get("/", response_model=list[schemas.OrderResponse])
+@router.get("", response_model=list[schemas.OrderResponse])
 async def list_orders(
     status: OrderStatus | None = None,
     needs_print: bool | None = None,
@@ -44,7 +42,7 @@ async def get_order(
     return order
 
 
-@router.post("/", response_model=schemas.OrderResponse)
+@router.post("", response_model=schemas.OrderResponse)
 async def create_order(
     order: schemas.OrderCreate,
     db: AsyncSession = Depends(get_db),

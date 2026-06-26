@@ -1,13 +1,14 @@
 # main.py
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import APIRouter, Depends, FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
 from api.config import settings
 from api.database import engine
 from api.routers import customers, orders
+from api.security import backend_auth
 from frontend.routers import auth, pages
 
 # uvicorn main:app --reload
@@ -31,7 +32,14 @@ app.add_middleware(
 
 app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
 
-app.include_router(orders.router, prefix="/api")
-app.include_router(customers.router, prefix="/api")
+api_router = APIRouter(
+    prefix="/api",
+    dependencies=[Depends(backend_auth.require_auth)],
+)
+
+api_router.include_router(customers.router)
+api_router.include_router(orders.router)
+
+app.include_router(api_router)
 app.include_router(pages.router)
 app.include_router(auth.router)

@@ -5,17 +5,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api import schemas
 from api.database import get_db
-from api.security import backend_auth
 from api.services import customers
 
 router = APIRouter(
     prefix="/customers",
     tags=["Customers"],
-    dependencies=[Depends(backend_auth.require_auth)],
 )
 
 
-@router.get("/", response_model=list[schemas.CustomerResponse])
+@router.get("", response_model=list[schemas.CustomerResponse])
 async def list_customers(
     skip: int = 0,
     limit: int = 50,
@@ -41,7 +39,7 @@ async def get_customer_by_id(
     return customer
 
 
-@router.post("/", response_model=schemas.CustomerResponse)
+@router.post("", response_model=schemas.CustomerResponse)
 async def create_customer(
     customer: schemas.CustomerCreate,
     db: AsyncSession = Depends(get_db),
