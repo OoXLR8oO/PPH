@@ -26,3 +26,6 @@ wheels/
 .env
 .env.app
 .env.docker
+
+# Docs
+docs/
