@@ -1,4 +1,5 @@
 .venv
+.vscode
 .git
 .gitignore
 .pytest_cache
@@ -9,3 +10,5 @@ __pycache__
 .env
 .env.docker
 .env.test
+!.env.example
+README.md
