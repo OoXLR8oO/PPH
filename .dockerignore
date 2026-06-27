@@ -1,6 +1,8 @@
 .venv
+.vercel
 .vscode
 .git
+.github
 .gitignore
 .pytest_cache
 .mypy_cache
@@ -8,7 +10,8 @@
 __pycache__
 *.pyc
 .env
-.env.docker
 .env.test
-!.env.example
+.env.example
+.pre-commit-config.yaml
 README.md
+docs
