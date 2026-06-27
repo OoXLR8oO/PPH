@@ -1,10 +1,7 @@
 # api/services/password.py
-from fastapi.security import OAuth2PasswordBearer
 from pwdlib import PasswordHash
 
 _password_hash = PasswordHash.recommended()
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/token")
 
 
 def hash_password(password: str) -> str:
