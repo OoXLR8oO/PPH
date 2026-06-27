@@ -1,4 +1,5 @@
 # api/config.py
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,7 +16,7 @@ class Settings(BaseSettings):
     admin_username: str
     admin_password_hash: str
 
-    secret_key: str
+    secret_key: SecretStr
 
 
 settings = Settings()  # type: ignore[call-arg] # Loaded from .env file

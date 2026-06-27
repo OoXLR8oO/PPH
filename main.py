@@ -25,7 +25,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     SessionMiddleware,
-    secret_key=settings.secret_key,
+    secret_key=settings.secret_key.get_secret_value(),
     max_age=1800,
     https_only=True,
 )
