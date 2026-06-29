@@ -4,6 +4,7 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database import get_db
+from api.limiter import limiter
 from api.services import pages
 from frontend.security import frontend_auth
 from frontend.templates_config import templates
@@ -12,6 +13,7 @@ router = APIRouter(tags=["Pages"])
 
 
 @router.get("/", response_class=HTMLResponse)
+@limiter.limit("60/minute")
 async def index(
     request: Request,
     auth=Depends(frontend_auth.require_auth),
@@ -36,6 +38,7 @@ async def index(
 
 
 @router.get("/orders/{order_code}/edit", response_class=HTMLResponse)
+@limiter.limit("60/minute")
 async def edit_order_page(
     request: Request,
     order_code: str,
@@ -62,6 +65,7 @@ async def edit_order_page(
 
 
 @router.get("/orders/new", response_class=HTMLResponse)
+@limiter.limit("60/minute")
 async def create_order_page(
     request: Request,
     auth=Depends(frontend_auth.require_auth),
@@ -77,6 +81,7 @@ async def create_order_page(
 
 
 @router.get("/customers/{customer_id}/edit", response_class=HTMLResponse)
+@limiter.limit("60/minute")
 async def edit_customer_page(
     request: Request,
     customer_id: int,
@@ -103,6 +108,7 @@ async def edit_customer_page(
 
 
 @router.get("/login", response_class=HTMLResponse)
+@limiter.limit("5/minute")
 async def login_page(request: Request):
     return templates.TemplateResponse(
         request=request,

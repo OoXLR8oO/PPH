@@ -1,12 +1,15 @@
 # main.py
 from contextlib import asynccontextmanager
 
-from fastapi import APIRouter, Depends, FastAPI
+from fastapi import APIRouter, Depends, FastAPI, Request, Response
 from fastapi.staticfiles import StaticFiles
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from starlette.middleware.sessions import SessionMiddleware
 
 from api.config import settings
 from api.database import engine
+from api.limiter import limiter
 from api.routers import customers, orders
 from api.security import backend_auth
 from frontend.routers import auth, pages
@@ -21,7 +24,18 @@ async def lifespan(app: FastAPI):
     await engine.dispose()
 
 
+def rate_limit_handler(request: Request, exc: Exception) -> Response:
+    assert isinstance(exc, RateLimitExceeded)
+    return _rate_limit_exceeded_handler(request, exc)
+
+
 app = FastAPI(lifespan=lifespan)
+
+app.state.limiter = limiter
+app.add_exception_handler(
+    RateLimitExceeded,
+    rate_limit_handler,
+)
 
 app.add_middleware(
     SessionMiddleware,

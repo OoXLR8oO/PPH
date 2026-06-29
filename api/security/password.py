@@ -1,7 +1,9 @@
-# api/services/password.py
+# api/security/password.py
 from pwdlib import PasswordHash
 
 _password_hash = PasswordHash.recommended()
+
+DUMMY_PASSWORD_HASH = _password_hash.hash("dummy-password")
 
 
 def hash_password(password: str) -> str:

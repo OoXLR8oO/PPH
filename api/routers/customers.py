@@ -1,10 +1,11 @@
 # api/routers/customers.py
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api import schemas
 from api.database import get_db
+from api.limiter import limiter
 from api.services import customers
 
 router = APIRouter(
@@ -14,7 +15,9 @@ router = APIRouter(
 
 
 @router.get("", response_model=list[schemas.CustomerResponse])
+@limiter.limit("60/minute")
 async def list_customers(
+    request: Request,
     skip: int = 0,
     limit: int = 50,
     email: str | None = None,
@@ -24,7 +27,9 @@ async def list_customers(
 
 
 @router.get("/{customer_id}", response_model=schemas.CustomerResponse)
+@limiter.limit("40/minute")
 async def get_customer_by_id(
+    request: Request,
     customer_id: int,
     db: AsyncSession = Depends(get_db),
 ):
@@ -40,7 +45,9 @@ async def get_customer_by_id(
 
 
 @router.post("", response_model=schemas.CustomerResponse)
+@limiter.limit("10/minute")
 async def create_customer(
+    request: Request,
     customer: schemas.CustomerCreate,
     db: AsyncSession = Depends(get_db),
 ):
@@ -55,7 +62,9 @@ async def create_customer(
 
 
 @router.patch("/{customer_id}", response_model=schemas.CustomerResponse)
+@limiter.limit("10/minute")
 async def update_customer(
+    request: Request,
     customer_id: int,
     payload: schemas.CustomerUpdate,
     db: AsyncSession = Depends(get_db),
@@ -72,7 +81,9 @@ async def update_customer(
 
 
 @router.delete("/{customer_id}")
+@limiter.limit("5/minute")
 async def delete_customer(
+    request: Request,
     customer_id: int,
     db: AsyncSession = Depends(get_db),
 ):

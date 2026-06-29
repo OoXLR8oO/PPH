@@ -1,10 +1,11 @@
 # api/routers/orders.py
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api import schemas
 from api.database import get_db
 from api.enums import OrderStatus
+from api.limiter import limiter
 from api.services import orders
 
 router = APIRouter(
@@ -14,7 +15,9 @@ router = APIRouter(
 
 
 @router.get("", response_model=list[schemas.OrderResponse])
+@limiter.limit("60/minute")
 async def list_orders(
+    request: Request,
     status: OrderStatus | None = None,
     needs_print: bool | None = None,
     name: str | None = None,
@@ -30,7 +33,9 @@ async def list_orders(
 
 
 @router.get("/{order_code}", response_model=schemas.OrderResponse)
+@limiter.limit("120/minute")
 async def get_order(
+    request: Request,
     order_code: str,
     db: AsyncSession = Depends(get_db),
 ):
@@ -43,7 +48,9 @@ async def get_order(
 
 
 @router.post("", response_model=schemas.OrderResponse)
+@limiter.limit("60/minute")
 async def create_order(
+    request: Request,
     order: schemas.OrderCreate,
     db: AsyncSession = Depends(get_db),
 ):
@@ -59,7 +66,9 @@ async def create_order(
 
 
 @router.patch("/{order_code}", response_model=schemas.OrderResponse)
+@limiter.limit("60/minute")
 async def update_order(
+    request: Request,
     order_code: str,
     payload: schemas.OrderUpdate,
     db: AsyncSession = Depends(get_db),
@@ -73,7 +82,9 @@ async def update_order(
 
 
 @router.delete("/{order_code}")
+@limiter.limit("10/minute")
 async def delete_order(
+    request: Request,
     order_code: str,
     db: AsyncSession = Depends(get_db),
 ):
