@@ -74,3 +74,8 @@ class OrderUpdate(BaseModel):
     film_type: FilmType | None = None
     needs_print: bool | None = None
     notes: str | None = None
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
