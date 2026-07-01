@@ -25,7 +25,7 @@ The project is split into two main parts:
 
 - **Frontend layer** (`/frontend`)
   - Server-rendered pages using Jinja2 templates
-  - Basic session-based authentication
+  - Basic token-based authentication
   - Simple dashboard UI for interacting with the system
 
 ## Key Technologies
@@ -34,7 +34,7 @@ The project is split into two main parts:
 - SQLAlchemy (async ORM)
 - PostgreSQL
 - Jinja2 templates
-- Session-based authentication
+- Token-based authentication
 - Alembic (database migrations)
 
 ## Project Structure
