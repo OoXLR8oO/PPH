@@ -10,22 +10,23 @@ from api.config import settings
 from api.database import get_db
 from api.models import User
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
-    to_encode = data.copy()
-
+def create_access_token(user_id: int, expires_delta: timedelta | None = None) -> str:
     expire = datetime.now(UTC) + (
         expires_delta
         if expires_delta
         else timedelta(minutes=settings.access_token_expire_minutes)
     )
 
-    to_encode.update({"exp": expire})
+    payload = {
+        "sub": str(user_id),
+        "exp": expire,
+    }
 
     return jwt.encode(
-        to_encode,
+        payload,
         settings.secret_key.get_secret_value(),
         algorithm=settings.algorithm,
     )
@@ -58,15 +59,14 @@ async def get_current_user(
         )
 
     try:
-        user_id = int(user_id)
+        user_id_int = int(user_id)
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token subject",
-            headers={"WWW-Authenticate": "Bearer"},
         )
 
-    result = await db.execute(select(User).where(User.id == user_id))
+    result = await db.execute(select(User).where(User.id == user_id_int))
     user = result.scalars().first()
 
     if not user:
