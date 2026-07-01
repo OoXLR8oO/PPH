@@ -18,10 +18,13 @@ document.addEventListener("DOMContentLoaded", () => {
       notes: form.notes.value || null,
     };
 
+    const token = localStorage.getItem("access_token");
+
     const res = await fetch("/api/orders", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": token ? `Bearer ${token}` : "",
       },
       body: JSON.stringify(payload),
     });

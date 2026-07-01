@@ -43,3 +43,38 @@ export function logout() {
 export function clearUserCache() {
   currentUser = null;
 }
+
+/* =========================
+   MOVED FROM base.html
+========================= */
+
+export function getToken() {
+  return localStorage.getItem("access_token");
+}
+
+export function isAuthPage() {
+  return window.location.pathname === "/login";
+}
+
+export function redirectToLoginIfNeeded() {
+  const token = getToken();
+
+  if (!token && !isAuthPage()) {
+    window.location.href = "/login";
+  }
+}
+
+export function setupLogout() {
+  const btn = document.getElementById("logoutBtn");
+
+  if (!btn) return;
+
+  if (getToken()) {
+    btn.style.display = "block";
+  }
+
+  btn.addEventListener("click", () => {
+    localStorage.removeItem("access_token");
+    window.location.href = "/login";
+  });
+}

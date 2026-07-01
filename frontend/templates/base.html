@@ -12,16 +12,19 @@
       <h1>Film Processing Dashboard</h1>
 
       <div class="top-bar-right">
-        {% if is_authenticated %}
-          <form method="post" action="/logout">
-            <button type="submit" class="btn btn-delete">
-              Logout
-            </button>
-          </form>
-        {% endif %}
+        <button id="logoutBtn" class="btn btn-delete" style="display:none">
+          Logout
+        </button>
       </div>
     </header>
 
     {% block content %}{% endblock %}
+
+    <script type="module">
+      import { redirectToLoginIfNeeded, setupLogout } from "/static/js/auth.js";
+
+      redirectToLoginIfNeeded();
+      setupLogout();
+    </script>
   </body>
 </html>

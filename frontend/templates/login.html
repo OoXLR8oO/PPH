@@ -3,12 +3,9 @@
 {% block content %}
   <h2>Login</h2>
 
-  {% if error %}
-    <p>{{ error }}</p>
-    <br>
-  {% endif %}
+  <p id="error" style="color:red"></p>
 
-  <form method="post">
+  <form id="loginForm">
     <label>Username</label><br>
     <input type="text" name="username" required>
 
@@ -21,4 +18,34 @@
 
     <button class="btn" type="submit">Login</button>
   </form>
+
+  <script type="module">
+    import { getToken } from "/static/js/auth.js";
+
+    if (getToken()) {
+      window.location.href = "/";
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+
+      const res = await fetch("/api/login", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        document.getElementById("error").innerText = data.detail;
+        return;
+      }
+
+      localStorage.setItem("access_token", data.access_token);
+
+      window.location.href = "/";
+    });
+  </script>
 {% endblock %}

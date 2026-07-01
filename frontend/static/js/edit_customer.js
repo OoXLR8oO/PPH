@@ -2,6 +2,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("edit-form");
   const deleteBtn = document.getElementById("delete-btn");
 
+  const token = localStorage.getItem("access_token");
+
   if (form) {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -19,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": token ? `Bearer ${token}` : ""
         },
         body: JSON.stringify(payload),
       });
@@ -41,6 +44,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const res = await fetch(`/api/customers/${customerId}`, {
         method: "DELETE",
+        headers: {
+          "Authorization": token ? `Bearer ${token}` : ""
+        }
       });
 
       if (!res.ok) {
