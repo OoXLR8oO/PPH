@@ -3,7 +3,7 @@
 {% block content %}
   <h2>Login</h2>
 
-  <p id="error" style="color:red"></p>
+  <p id="error" class="error-text"></p>
 
   <form id="loginForm">
     <label>Username</label><br>
@@ -19,33 +19,5 @@
     <button class="btn" type="submit">Login</button>
   </form>
 
-  <script type="module">
-    import { getToken } from "/static/js/auth.js";
-
-    if (getToken()) {
-      window.location.href = "/";
-    }
-
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const formData = new FormData(e.target);
-
-      const res = await fetch("/api/login", {
-        method: "POST",
-        body: formData
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        document.getElementById("error").innerText = data.detail;
-        return;
-      }
-
-      localStorage.setItem("access_token", data.access_token);
-
-      window.location.href = "/";
-    });
-  </script>
+  <script type="module" src="/static/js/login.js"></script>
 {% endblock %}

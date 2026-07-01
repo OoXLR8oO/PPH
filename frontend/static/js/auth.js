@@ -70,7 +70,7 @@ export function setupLogout() {
   if (!btn) return;
 
   if (getToken()) {
-    btn.style.display = "block";
+    btn.classList.remove("hidden");
   }
 
   btn.addEventListener("click", () => {

@@ -10,6 +10,7 @@ from api.database import engine
 from api.limiter import limiter
 from api.routers import customers, orders
 from api.security.jwt_auth import get_current_user
+from api.security.middleware import SecurityHeadersMiddleware
 from frontend.routers import auth, pages
 
 # uvicorn main:app --reload
@@ -33,6 +34,10 @@ app.state.limiter = limiter
 app.add_exception_handler(
     RateLimitExceeded,
     rate_limit_handler,
+)
+
+app.add_middleware(
+    SecurityHeadersMiddleware,
 )
 
 app.mount("/static", StaticFiles(directory="frontend/static"), name="static")

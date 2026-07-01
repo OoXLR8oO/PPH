@@ -12,7 +12,7 @@
       <h1>Film Processing Dashboard</h1>
 
       <div class="top-bar-right">
-        <button id="logoutBtn" class="btn btn-delete" style="display:none">
+        <button id="logoutBtn" class="btn btn-delete hidden">
           Logout
         </button>
       </div>
@@ -20,11 +20,6 @@
 
     {% block content %}{% endblock %}
 
-    <script type="module">
-      import { redirectToLoginIfNeeded, setupLogout } from "/static/js/auth.js";
-
-      redirectToLoginIfNeeded();
-      setupLogout();
-    </script>
+    <script type="module" src="/static/js/base.js"></script>
   </body>
 </html>
