@@ -1,22 +1,21 @@
-# frontend/routers/auth.py
 import asyncio
 
 from fastapi import APIRouter, Depends, Form, Request, status
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database import get_db
 from api.limiter import limiter
-from api.security.password import DUMMY_PASSWORD_HASH, verify_password
+from api.security.backend_auth import DUMMY_PASSWORD_HASH, verify_password
+from api.security.jwt_auth import create_access_token
 from api.services.user import get_user_by_username
-from frontend.templates_config import templates
 
 FAILURE_DELAY = 0.3
 
 router = APIRouter(tags=["Auth"])
 
 
-@router.post("/login")
+@router.post("/api/login")
 @limiter.limit("5/minute")
 async def login(
     request: Request,
@@ -33,23 +32,18 @@ async def login(
     await asyncio.sleep(FAILURE_DELAY)
 
     if not user or not is_valid:
-        return templates.TemplateResponse(
-            request=request,
-            name="login.html",
-            context={"request": request, "error": "Invalid username or password"},
+        return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"detail": "Invalid username or password"},
         )
 
-    request.session["user_id"] = user.id
+    token = create_access_token(user.id)
 
-    return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
-
-
-@router.post("/logout")
-async def logout(request: Request):
-    request.session.clear()
-
-    return RedirectResponse(
-        url="/login",
-        status_code=status.HTTP_303_SEE_OTHER,
+    return JSONResponse(
+        content={"access_token": token, "token_type": "bearer"},
     )
+
+
+@router.post("/api/logout")
+async def logout():
+    return JSONResponse(content={"detail": "ok"})

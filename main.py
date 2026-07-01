@@ -5,13 +5,11 @@ from fastapi import APIRouter, Depends, FastAPI, Request, Response
 from fastapi.staticfiles import StaticFiles
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from starlette.middleware.sessions import SessionMiddleware
 
-from api.config import settings
 from api.database import engine
 from api.limiter import limiter
 from api.routers import customers, orders
-from api.security import backend_auth
+from api.security.jwt_auth import get_current_user
 from frontend.routers import auth, pages
 
 # uvicorn main:app --reload
@@ -37,18 +35,11 @@ app.add_exception_handler(
     rate_limit_handler,
 )
 
-app.add_middleware(
-    SessionMiddleware,
-    secret_key=settings.secret_key.get_secret_value(),
-    max_age=1800,
-    https_only=True,
-)
-
 app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
 
 api_router = APIRouter(
     prefix="/api",
-    dependencies=[Depends(backend_auth.require_auth)],
+    dependencies=[Depends(get_current_user)],
 )
 
 api_router.include_router(customers.router)

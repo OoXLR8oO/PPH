@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.database import get_db
 from api.limiter import limiter
 from api.services import pages
-from frontend.security import frontend_auth
 from frontend.templates_config import templates
 
 router = APIRouter(tags=["Pages"])
@@ -16,7 +15,6 @@ router = APIRouter(tags=["Pages"])
 @limiter.limit("60/minute")
 async def index(
     request: Request,
-    auth=Depends(frontend_auth.require_auth),
     view: str = "orders",
     search: str | None = None,
     db: AsyncSession = Depends(get_db),
@@ -26,7 +24,6 @@ async def index(
     context.update(
         {
             "request": request,
-            "is_authenticated": frontend_auth.is_authenticated(request),
         }
     )
 
@@ -42,7 +39,6 @@ async def index(
 async def edit_order_page(
     request: Request,
     order_code: str,
-    auth=Depends(frontend_auth.require_auth),
     db=Depends(get_db),
 ):
     order = await pages.get_order_edit_page(order_code, db)
@@ -59,7 +55,6 @@ async def edit_order_page(
         context={
             "request": request,
             "order": order,
-            "is_authenticated": frontend_auth.is_authenticated(request),
         },
     )
 
@@ -68,14 +63,12 @@ async def edit_order_page(
 @limiter.limit("60/minute")
 async def create_order_page(
     request: Request,
-    auth=Depends(frontend_auth.require_auth),
 ):
     return templates.TemplateResponse(
         request=request,
         name="create_order.html",
         context={
             "request": request,
-            "is_authenticated": frontend_auth.is_authenticated(request),
         },
     )
 
@@ -85,7 +78,6 @@ async def create_order_page(
 async def edit_customer_page(
     request: Request,
     customer_id: int,
-    auth=Depends(frontend_auth.require_auth),
     db=Depends(get_db),
 ):
     customer = await pages.get_customer_edit_page(customer_id, db)
@@ -102,7 +94,6 @@ async def edit_customer_page(
         context={
             "request": request,
             "customer": customer,
-            "is_authenticated": frontend_auth.is_authenticated(request),
         },
     )
 
@@ -115,6 +106,5 @@ async def login_page(request: Request):
         name="login.html",
         context={
             "request": request,
-            "is_authenticated": frontend_auth.is_authenticated(request),
         },
     )
