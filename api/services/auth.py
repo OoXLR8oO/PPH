@@ -1,4 +1,4 @@
-# api/services/user.py
+# api/services/auth.py
 from sqlalchemy import func, select
 
 from api.models import User

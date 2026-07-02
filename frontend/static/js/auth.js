@@ -1,6 +1,7 @@
 let currentUser = null;
 let fetchPromise = null;
 
+
 export async function getCurrentUser() {
   if (currentUser) return currentUser;
   if (fetchPromise) return fetchPromise;
@@ -34,15 +35,18 @@ export async function getCurrentUser() {
   return fetchPromise;
 }
 
+
 export function logout() {
   localStorage.removeItem("access_token");
   currentUser = null;
   window.location.href = "/";
 }
 
+
 export function clearUserCache() {
   currentUser = null;
 }
+
 
 /* =========================
    MOVED FROM base.html
@@ -56,6 +60,7 @@ export function isAuthPage() {
   return window.location.pathname === "/login";
 }
 
+
 export function redirectToLoginIfNeeded() {
   const token = getToken();
 
@@ -63,6 +68,7 @@ export function redirectToLoginIfNeeded() {
     window.location.href = "/login";
   }
 }
+
 
 export function setupLogout() {
   const btn = document.getElementById("logoutBtn");
@@ -73,8 +79,33 @@ export function setupLogout() {
     btn.classList.remove("hidden");
   }
 
-  btn.addEventListener("click", () => {
-    localStorage.removeItem("access_token");
-    window.location.href = "/login";
+  btn.addEventListener("click", async () => {
+    try {
+      await fetch("/api/logout", {
+        method: "POST",
+        credentials: "include"
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      localStorage.removeItem("access_token");
+      currentUser = null;
+      window.location.href = "/login";
+    }
   });
+}
+
+
+async function refreshAccessToken() {
+  const res = await fetch("/refresh", {
+    method: "POST",
+    credentials: "include"
+  });
+
+  if (!res.ok) return null;
+
+  const data = await res.json();
+  localStorage.setItem("access_token", data.access_token);
+
+  return data.access_token;
 }

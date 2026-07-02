@@ -1,3 +1,4 @@
+# api/security/jwt_auth.py
 from datetime import UTC, datetime, timedelta
 
 import jwt
@@ -76,3 +77,37 @@ async def get_current_user(
         )
 
     return user
+
+
+def create_refresh_token(user_id: int, expires_delta: timedelta | None = None) -> str:
+    expire = datetime.now(UTC) + (expires_delta if expires_delta else timedelta(days=7))
+
+    payload = {
+        "sub": str(user_id),
+        "exp": expire,
+        "type": "refresh",
+    }
+
+    return jwt.encode(
+        payload,
+        settings.secret_key.get_secret_value(),
+        algorithm=settings.algorithm,
+    )
+
+
+def verify_refresh_token(token: str) -> str | None:
+    try:
+        payload = jwt.decode(
+            token,
+            settings.secret_key.get_secret_value(),
+            algorithms=[settings.algorithm],
+            options={"require": ["exp", "sub"]},
+        )
+
+        if payload.get("type") != "refresh":
+            return None
+
+        return payload.get("sub")
+
+    except jwt.InvalidTokenError:
+        return None

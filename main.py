@@ -2,6 +2,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import APIRouter, Depends, FastAPI, Request, Response
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -38,6 +39,14 @@ app.add_exception_handler(
 
 app.add_middleware(
     SecurityHeadersMiddleware,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:8000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
