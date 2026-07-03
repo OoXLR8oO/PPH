@@ -1,31 +1,28 @@
+// api.js
 export async function apiFetch(url, options = {}) {
-  let token = localStorage.getItem("access_token");
-
   const isFormData = options.body instanceof FormData;
 
-  const makeRequest = (t) =>
+  const makeRequest = () =>
     fetch(url, {
       ...options,
+      credentials: "include",
       headers: {
         ...(options.headers || {}),
         ...(isFormData ? {} : { "Content-Type": "application/json" }),
-        Authorization: t ? `Bearer ${t}` : ""
-      }
+      },
     });
 
-  let res = await makeRequest(token);
+  let res = await makeRequest();
 
-  // If token expired → try refresh once
   if (res.status === 401) {
-    const newToken = await refreshAccessToken();
+    const refreshed = await refreshAccessToken();
 
-    if (!newToken) {
-      localStorage.removeItem("access_token");
+    if (!refreshed) {
       window.location.href = "/login";
       return;
     }
 
-    res = await makeRequest(newToken);
+    res = await makeRequest();
   }
 
   return res;

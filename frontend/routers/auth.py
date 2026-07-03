@@ -1,8 +1,8 @@
+# frontend/routers/auth.py
 import asyncio
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, Form, Request, Response, status
 from fastapi.responses import JSONResponse
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database import get_db
@@ -12,7 +12,8 @@ from api.security.backend_auth import DUMMY_PASSWORD_HASH, verify_password
 from api.security.jwt_auth import (
     create_access_token,
     create_refresh_token,
-    verify_refresh_token,
+    get_current_user,
+    get_user_from_refresh_token,
 )
 from api.services.auth import get_user_by_username
 
@@ -21,7 +22,7 @@ FAILURE_DELAY = 0.3
 router = APIRouter(tags=["Auth"])
 
 
-@router.post("/api/login")
+@router.post("/login")
 @limiter.limit("5/minute")
 async def login(
     request: Request,
@@ -47,7 +48,15 @@ async def login(
     access_token = create_access_token(user.id)
     refresh_token = create_refresh_token(user.id)
 
-    # request.session["access_token"] = access_token
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=True,
+        samesite="strict",
+        max_age=60 * 15,
+        path="/",
+    )
 
     response.set_cookie(
         key="refresh_token",
@@ -55,54 +64,56 @@ async def login(
         httponly=True,
         secure=True,
         samesite="strict",
-        max_age=60 * 60 * 24 * 7,
+        max_age=60 * 60 * 24,
         path="/refresh",
     )
 
     return {
-        "access_token": access_token,
-        "token_type": "bearer",
+        "detail": "ok",
     }
 
 
-@router.post("/api/logout")
+@router.post("/logout")
 async def logout(response: Response):
-    response.delete_cookie("refresh_token")
+    response.delete_cookie(key="access_token", path="/")
+    response.delete_cookie(key="refresh_token", path="/refresh")
+
     return {
         "detail": "ok",
     }
 
 
 @router.post("/refresh")
-async def refresh_token(
+@limiter.limit("10/minute")
+async def refresh(
     request: Request,
+    response: Response,
     db: AsyncSession = Depends(get_db),
 ):
-    refresh_token = request.cookies.get("refresh_token")
+    user = await get_user_from_refresh_token(
+        request.cookies.get("refresh_token"),
+        db,
+    )
 
-    if not refresh_token:
-        raise HTTPException(status_code=401, detail="Missing refresh token")
+    access_token = create_access_token(user.id)
 
-    user_id = verify_refresh_token(refresh_token)
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=True,
+        samesite="strict",
+        max_age=60 * 15,
+        path="/",
+    )
 
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Invalid refresh token")
+    return {"detail": "ok"}
 
-    try:
-        user_id_int = int(user_id)
-    except ValueError:
-        raise HTTPException(status_code=401, detail="Invalid token subject")
 
-    result = await db.execute(select(User).where(User.id == user_id_int))
-
-    user = result.scalars().first()
-
-    if not user:
-        raise HTTPException(status_code=401, detail="User not found")
-
-    new_access_token = create_access_token(user.id)
-
+@router.get("/me")
+@limiter.limit("20/minute")
+async def me(request: Request, user: User = Depends(get_current_user)):
     return {
-        "access_token": new_access_token,
-        "token_type": "bearer",
+        "id": user.id,
+        "username": user.username,
     }

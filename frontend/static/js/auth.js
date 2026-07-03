@@ -1,3 +1,4 @@
+// auth.js
 let currentUser = null;
 let fetchPromise = null;
 
@@ -6,15 +7,10 @@ export async function getCurrentUser() {
   if (currentUser) return currentUser;
   if (fetchPromise) return fetchPromise;
 
-  const token = localStorage.getItem("access_token");
-  if (!token) return null;
-
   fetchPromise = (async () => {
     try {
       const response = await fetch("/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: "include",
       });
 
       if (response.ok) {
@@ -22,7 +18,6 @@ export async function getCurrentUser() {
         return currentUser;
       }
 
-      localStorage.removeItem("access_token");
       return null;
     } catch (err) {
       console.error(err);
@@ -37,7 +32,6 @@ export async function getCurrentUser() {
 
 
 export function logout() {
-  localStorage.removeItem("access_token");
   currentUser = null;
   window.location.href = "/";
 }
@@ -48,24 +42,35 @@ export function clearUserCache() {
 }
 
 
-/* =========================
-   MOVED FROM base.html
-========================= */
-
-export function getToken() {
-  return localStorage.getItem("access_token");
-}
-
 export function isAuthPage() {
   return window.location.pathname === "/login";
 }
 
 
-export function redirectToLoginIfNeeded() {
-  const token = getToken();
+export async function redirectToLoginIfNeeded() {
+  if (isAuthPage()) return;
 
-  if (!token && !isAuthPage()) {
-    window.location.href = "/login";
+  let res = await fetch("/me", {
+    credentials: "include",
+  });
+
+  if (res.ok) return;
+
+  if (res.status === 401) {
+    const refreshed = await refreshAccessToken();
+
+    if (!refreshed) {
+      window.location.href = "/login";
+      return;
+    }
+
+    res = await fetch("/me", {
+      credentials: "include",
+    });
+
+    if (!res.ok) {
+      window.location.href = "/login";
+    }
   }
 }
 
@@ -75,20 +80,14 @@ export function setupLogout() {
 
   if (!btn) return;
 
-  if (getToken()) {
-    btn.classList.remove("hidden");
-  }
-
   btn.addEventListener("click", async () => {
     try {
-      await fetch("/api/logout", {
+      await fetch("/logout", {
         method: "POST",
-        credentials: "include"
+        credentials: "include",
       });
-    } catch (err) {
-      console.error(err);
-    } finally {
-      localStorage.removeItem("access_token");
+    } 
+    finally {
       currentUser = null;
       window.location.href = "/login";
     }
@@ -103,9 +102,5 @@ async function refreshAccessToken() {
   });
 
   if (!res.ok) return null;
-
-  const data = await res.json();
-  localStorage.setItem("access_token", data.access_token);
-
-  return data.access_token;
+  return res.ok;
 }

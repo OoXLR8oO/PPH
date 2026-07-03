@@ -1,9 +1,4 @@
-import { getToken } from "/static/js/auth.js";
-
-if (getToken()) {
-  window.location.href = "/";
-}
-
+// login.js
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("loginForm");
   const error = document.getElementById("error");
@@ -15,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const formData = new FormData(e.target);
 
-    const res = await fetch("/api/login", {
+    const res = await fetch("/login", {
       method: "POST",
       body: formData
     });
@@ -26,8 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
       error.innerText = data.detail;
       return;
     }
-
-    localStorage.setItem("access_token", data.access_token);
 
     window.location.href = "/";
   });
