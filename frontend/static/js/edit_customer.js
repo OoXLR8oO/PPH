@@ -1,3 +1,4 @@
+//edit_customer.js
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("edit-form");
   const deleteBtn = document.getElementById("delete-btn");
