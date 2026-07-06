@@ -82,3 +82,27 @@ class Order(Base):
     )
 
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    batch_id: Mapped[int | None] = mapped_column(
+        ForeignKey("batches.id", name="fk_orders_batch_id_batches"),
+        nullable=True,
+    )
+
+    batch: Mapped[Batch] = relationship(back_populates="orders")
+
+
+class Batch(Base):
+    __tablename__ = "batches"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    batch_code: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    dropbox_link: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    orders: Mapped[list[Order]] = relationship(back_populates="batch")
