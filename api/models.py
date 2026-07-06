@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, String, Text
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from api.database import Base
@@ -25,6 +25,12 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(
         String,
         nullable=False,
+    )
+
+    refresh_token_version: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
     )
 
 

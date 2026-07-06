@@ -73,13 +73,16 @@ async def get_current_user(
     return user
 
 
-def create_refresh_token(user_id: int, expires_delta: timedelta | None = None) -> str:
+def create_refresh_token(
+    user_id: int, version: int, expires_delta: timedelta | None = None
+) -> str:
     expire = datetime.now(UTC) + (expires_delta if expires_delta else timedelta(days=7))
 
     payload = {
         "sub": str(user_id),
         "exp": expire,
         "type": "refresh",
+        "ver": version,
     }
 
     return jwt.encode(
@@ -89,7 +92,7 @@ def create_refresh_token(user_id: int, expires_delta: timedelta | None = None) -
     )
 
 
-def verify_refresh_token(token: str) -> str | None:
+def verify_refresh_token(token: str) -> dict | None:
     try:
         payload = jwt.decode(
             token,
@@ -101,7 +104,7 @@ def verify_refresh_token(token: str) -> str | None:
         if payload.get("type") != "refresh":
             return None
 
-        return payload.get("sub")
+        return payload
 
     except jwt.InvalidTokenError:
         return None
@@ -117,17 +120,17 @@ async def get_user_from_refresh_token(
             detail="Missing refresh token",
         )
 
-    user_id = verify_refresh_token(refresh_token)
+    payload = verify_refresh_token(refresh_token)
 
-    if not user_id:
+    if not payload:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid refresh token",
         )
 
     try:
-        user_id = int(user_id)
-    except ValueError:
+        user_id = int(payload["sub"])
+    except (KeyError, ValueError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token subject",
@@ -139,6 +142,12 @@ async def get_user_from_refresh_token(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
+        )
+
+    if payload.get("ver") != user.refresh_token_version:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Stale refresh token",
         )
 
     return user

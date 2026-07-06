@@ -1,5 +1,17 @@
 // base.js
-import { redirectToLoginIfNeeded, setupLogout } from "/static/js/auth.js";
+import { ensureAuthenticated, goToLogin, setupLogout } from "/static/js/auth.js";
 
-redirectToLoginIfNeeded();
-setupLogout();
+
+async function initializeAppShell() {
+  const isAuthenticated = await ensureAuthenticated();
+
+  if (!isAuthenticated) {
+    goToLogin();
+    return;
+  }
+
+  setupLogout();
+}
+
+
+initializeAppShell();

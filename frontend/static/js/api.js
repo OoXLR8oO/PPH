@@ -1,29 +1,43 @@
 // api.js
-export async function apiFetch(url, options = {}) {
+import { goToLogin, refreshSession } from "/static/js/auth.js";
+
+
+async function makeRequest(url, options) {
   const isFormData = options.body instanceof FormData;
 
-  const makeRequest = () =>
-    fetch(url, {
-      ...options,
-      credentials: "include",
-      headers: {
-        ...(options.headers || {}),
-        ...(isFormData ? {} : { "Content-Type": "application/json" }),
-      },
-    });
+  return fetch(url, {
+    ...options,
+    credentials: "include",
+    headers: {
+      ...(options.headers || {}),
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
+    },
+  });
+}
 
-  let res = await makeRequest();
 
-  if (res.status === 401) {
-    const refreshed = await refreshAccessToken();
+/**
+ * Fetch wrapper with automatic one-time refresh on 401.
+ */
+export async function apiFetch(url, options = {}) {
+  let response = await makeRequest(url, options);
 
-    if (!refreshed) {
-      window.location.href = "/login";
-      return;
-    }
-
-    res = await makeRequest();
+  if (response.status !== 401) {
+    return response;
   }
 
-  return res;
+  const refreshed = await refreshSession();
+
+  if (!refreshed) {
+    goToLogin();
+    return response;
+  }
+
+  response = await makeRequest(url, options);
+
+  if (response.status === 401) {
+    goToLogin();
+  }
+
+  return response;
 }

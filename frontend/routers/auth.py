@@ -15,7 +15,7 @@ from api.security.jwt_auth import (
     get_current_user,
     get_user_from_refresh_token,
 )
-from api.services.auth import get_user_by_username
+from api.services.auth import get_user_by_username, rotate_refresh_token
 
 FAILURE_DELAY = 0.3
 
@@ -46,7 +46,7 @@ async def login(
         )
 
     access_token = create_access_token(user.id)
-    refresh_token = create_refresh_token(user.id)
+    refresh_token = create_refresh_token(user.id, user.refresh_token_version)
 
     response.set_cookie(
         key="access_token",
@@ -54,7 +54,7 @@ async def login(
         httponly=True,
         secure=True,
         samesite="strict",
-        max_age=60 * 15,
+        max_age=15,
         path="/",
     )
 
@@ -95,16 +95,33 @@ async def refresh(
         db,
     )
 
-    access_token = create_access_token(user.id)
+    await rotate_refresh_token(db, user)
+
+    new_refresh_token = create_refresh_token(
+        user.id,
+        user.refresh_token_version,
+    )
+
+    new_access_token = create_access_token(user.id)
 
     response.set_cookie(
         key="access_token",
-        value=access_token,
+        value=new_access_token,
         httponly=True,
         secure=True,
         samesite="strict",
         max_age=60 * 15,
         path="/",
+    )
+
+    response.set_cookie(
+        key="refresh_token",
+        value=new_refresh_token,
+        httponly=True,
+        secure=True,
+        samesite="strict",
+        max_age=60 * 60 * 24 * 7,
+        path="/refresh",
     )
 
     return {"detail": "ok"}
