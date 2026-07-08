@@ -37,7 +37,7 @@ class User(Base):
 class Customer(Base):
     __tablename__ = "customers"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     email: Mapped[str] = mapped_column(String, nullable=False, unique=True, index=True)
     phone: Mapped[str] = mapped_column(String, nullable=False)
@@ -86,6 +86,7 @@ class Order(Base):
     batch_id: Mapped[int | None] = mapped_column(
         ForeignKey("batches.id", name="fk_orders_batch_id_batches"),
         nullable=True,
+        index=True,
     )
 
     batch: Mapped[Batch] = relationship(back_populates="orders")
@@ -94,9 +95,8 @@ class Order(Base):
 class Batch(Base):
     __tablename__ = "batches"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-
-    batch_code: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    batch_code: Mapped[str] = mapped_column(String, unique=True, nullable=True)
     dropbox_link: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
