@@ -6,7 +6,7 @@ from sqlalchemy.orm import joinedload
 
 from api import models, schemas
 from api.enums import OrderStatus
-from api.utils import generate_batch_code, get_next_order_code, get_next_order_codes
+from api.utils import generate_batch_code, get_next_order_codes
 
 
 async def list_orders(
