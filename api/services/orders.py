@@ -6,7 +6,7 @@ from sqlalchemy.orm import joinedload
 
 from api import models, schemas
 from api.enums import OrderStatus
-from api.utils import get_next_order_code
+from api.utils import generate_batch_code, get_next_order_code, get_next_order_codes
 
 
 async def list_orders(
@@ -57,53 +57,72 @@ async def get_order_by_code(order_code: str, db: AsyncSession):
     return result.scalars().first()
 
 
-async def create_order(order: schemas.OrderCreate, db: AsyncSession):
+async def create_order(
+    order: schemas.OrderCreate,
+    db: AsyncSession,
+):
     email = order.customer.email.strip().lower()
 
-    # 1. Find or create customer
-    stmt = select(models.Customer).where(models.Customer.email == email)
-    result = await db.execute(stmt)
-    customer = result.scalars().first()
+    try:
+        # 1. Find or create customer
+        stmt = select(models.Customer).where(models.Customer.email == email)
 
-    if not customer:
-        customer = models.Customer(
-            name=order.customer.name,
-            email=email,
-            phone=order.customer.phone,
-            notes=order.customer.notes,
-        )
-        db.add(customer)
-        await db.flush()  # ensure customer.id exists
+        result = await db.execute(stmt)
+        customer = result.scalars().first()
 
-    # 2. Create order with retry logic
-    for _ in range(5):
-        code = await get_next_order_code(db)
-
-        new_order = models.Order(
-            order_code=code,
-            customer_id=customer.id,
-            film_type=order.film_type,
-            needs_print=order.needs_print,
-            notes=order.notes,
-        )
-
-        db.add(new_order)
-
-        try:
-            await db.commit()
-
-            result = await db.execute(
-                select(models.Order)
-                .options(joinedload(models.Order.customer))
-                .where(models.Order.id == new_order.id)
+        if not customer:
+            customer = models.Customer(
+                name=order.customer.name,
+                email=email,
+                phone=order.customer.phone,
+                notes=order.customer.notes,
             )
 
-            return result.scalars().first()
+            db.add(customer)
+            await db.flush()
 
-        except IntegrityError:
-            await db.rollback()
+        # 2. Generate order codes
+        order_codes = await get_next_order_codes(
+            db,
+            order.quantity,
+        )
 
-    return None
+        # 3. Create batch
+        batch = models.Batch(
+            batch_code=generate_batch_code(order_codes),
+            dropbox_link=None,
+        )
+
+        db.add(batch)
+        await db.flush()
+
+        # 4. Create orders
+        for code in order_codes:
+            new_order = models.Order(
+                order_code=code,
+                customer_id=customer.id,
+                batch_id=batch.id,
+                film_type=order.film_type,
+                needs_print=order.needs_print,
+                notes=order.notes,
+            )
+
+            db.add(new_order)
+
+        await db.commit()
+
+        # 5. Reload with relationships
+        result = await db.execute(
+            select(models.Batch)
+            .options(joinedload(models.Batch.orders).joinedload(models.Order.customer))
+            .where(models.Batch.id == batch.id)
+        )
+
+        return result.unique().scalar_one()
+
+    except IntegrityError:
+        await db.rollback()
+        return None
 
 
 async def update_order(

@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
         notes: form.customer_notes.value || null,
       },
       film_type: form.film_type.value,
+      quantity: Number(form.quantity.value),
       needs_print: form.needs_print.checked,
       notes: form.notes.value || null,
     };
