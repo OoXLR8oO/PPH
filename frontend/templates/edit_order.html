@@ -2,7 +2,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <script src="{{ url_for('static', path='js/edit_order.js') }}"></script>
+  <script type="module" src="{{ url_for('static', path='js/edit_order.js') }}"></script>
 
   <h2>Edit Order {{ order.order_code }}</h2>
 

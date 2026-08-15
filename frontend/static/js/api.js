@@ -20,6 +20,7 @@ async function makeRequest(url, options) {
  * Fetch wrapper with automatic one-time refresh on 401.
  */
 export async function apiFetch(url, options = {}) {
+  console.log("apiFetch called:", url);
   let response = await makeRequest(url, options);
 
   if (response.status !== 401) {

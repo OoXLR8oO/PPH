@@ -24,7 +24,7 @@ async function fetchCurrentUser() {
  * Attempts to refresh the access token.
  * Returns true if successful.
  */
-async function refreshSession() {
+export async function refreshSession() {
   const response = await fetch("/refresh", {
     method: "POST",
     credentials: "include",

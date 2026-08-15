@@ -54,7 +54,7 @@ async def login(
         httponly=True,
         secure=True,
         samesite="strict",
-        max_age=60 * 15,
+        max_age=15,
         path="/",
     )
 

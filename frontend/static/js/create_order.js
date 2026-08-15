@@ -1,4 +1,6 @@
-//create_order.js
+// create_order.js
+import { apiFetch } from "/static/js/api.js";
+
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("create-form");
 
@@ -20,13 +22,8 @@ document.addEventListener("DOMContentLoaded", () => {
       notes: form.notes.value || null,
     };
 
-    const token = localStorage.getItem("access_token");
-
-    const res = await fetch("/api/orders", {
+    const res = await apiFetch("/api/orders", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(payload),
     });
 

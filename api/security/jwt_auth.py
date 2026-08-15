@@ -14,7 +14,7 @@ def create_access_token(user_id: int, expires_delta: timedelta | None = None) ->
     expire = datetime.now(UTC) + (
         expires_delta
         if expires_delta
-        else timedelta(minutes=settings.access_token_expire_minutes)
+        else timedelta(seconds=settings.access_token_expire_seconds)
     )
 
     payload = {
