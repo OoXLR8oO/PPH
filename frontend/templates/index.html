@@ -12,6 +12,11 @@
       class="btn nav-btn {% if view == 'customers' %}active{% endif %}">
       Customers
     </a>
+
+    <a href="{{ url_for('index') }}?view=batches"
+      class="btn nav-btn {% if view == 'batches' %}active{% endif %}">
+      Batches
+    </a>
   </div>
 
   <form method="get" action="{{ url_for('index') }}">
@@ -40,6 +45,8 @@
 
   {% if view == "customers" %}
     {% include "partials/customers_table.html" %}
+  {% elif view == "batches" %}
+    {% include "partials/batches_table.html" %}
   {% else %}
     {% include "partials/orders_table.html" %}
   {% endif %}

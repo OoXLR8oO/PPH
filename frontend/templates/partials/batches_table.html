@@ -1,0 +1,47 @@
+<!-- batches_table.html -->
+{% if batches %}
+  <table>
+    <thead>
+      <tr>
+        <th>Batch Code</th>
+        <th class="col-date">Created At</th>
+        <th>Customer Name</th>
+        <th>Email</th>
+        <th>Orders</th>
+        <th>Dropbox</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for batch in batches %}
+        <tr>
+          <td>{{ batch.batch_code }}</td>
+          <td>{{ batch.created_at | melbourne_datetime }}</td>
+          <td>{{ batch.customer.name }}</td>
+          <td>{{ batch.customer.email }}</td>
+          <td>{{ batch.orders | length }}</td>
+
+          <td>
+            {% if batch.dropbox_link %}
+              <a href="{{ batch.dropbox_link }}" target="_blank">
+                {{ batch.dropbox_link }}
+              </a>
+            {% else %}
+              -
+            {% endif %}
+          </td>
+
+          <td>
+            <a href="{{ url_for('edit_batch_page', batch_id=batch.id) }}" 
+            class="btn btn-edit">
+              Edit
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No batches found.</p>
+{% endif %}
