@@ -98,6 +98,31 @@ async def edit_customer_page(
     )
 
 
+@router.get("/batches/{batch_id}/edit", response_class=HTMLResponse)
+@limiter.limit("60/minute")
+async def edit_batch_page(
+    request: Request,
+    batch_id: int,
+    db=Depends(get_db),
+):
+    batch = await pages.get_batch_edit_page(batch_id, db)
+
+    if not batch:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Batch not found",
+        )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="edit_batch.html",
+        context={
+            "request": request,
+            "batch": batch,
+        },
+    )
+
+
 @router.get("/login", response_class=HTMLResponse)
 @limiter.limit("5/minute")
 async def login_page(request: Request):

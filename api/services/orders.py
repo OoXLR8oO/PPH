@@ -91,6 +91,7 @@ async def create_order(
         batch = models.Batch(
             batch_code=generate_batch_code(order_codes),
             dropbox_link=None,
+            customer_id=customer.id,
         )
 
         db.add(batch)
