@@ -2,6 +2,7 @@
 from datetime import UTC, datetime
 
 from pydantic import (
+    AnyHttpUrl,
     BaseModel,
     ConfigDict,
     EmailStr,
@@ -82,6 +83,10 @@ class BatchResponse(BaseModel):
     orders: list[OrderResponse]
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class BatchUpdate(BaseModel):
+    dropbox_link: AnyHttpUrl | None = None
 
 
 class OrderUpdate(BaseModel):

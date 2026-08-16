@@ -47,6 +47,12 @@ class Customer(Base):
         "Order", back_populates="customer", cascade="all, delete-orphan"
     )
 
+    batches: Mapped[list[Batch]] = relationship(
+        "Batch",
+        back_populates="customer",
+        cascade="all, delete-orphan",
+    )
+
     @validates("email")
     def normalize_email(self, key, value):
         return value.lower()
@@ -84,7 +90,7 @@ class Order(Base):
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     batch_id: Mapped[int | None] = mapped_column(
-        ForeignKey("batches.id", name="fk_orders_batch_id_batches"),
+        ForeignKey("batches.id", name="fk_orders_batch_id_batches", ondelete="CASCADE"),
         nullable=True,
         index=True,
     )
@@ -105,4 +111,15 @@ class Batch(Base):
         nullable=False,
     )
 
-    orders: Mapped[list[Order]] = relationship(back_populates="batch")
+    orders: Mapped[list[Order]] = relationship(
+        back_populates="batch",
+        cascade="all, delete-orphan",
+    )
+
+    customer_id: Mapped[int] = mapped_column(
+        ForeignKey("customers.id"),
+        nullable=False,
+        index=True,
+    )
+
+    customer: Mapped[Customer] = relationship(back_populates="batches")
