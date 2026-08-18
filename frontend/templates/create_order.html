@@ -2,7 +2,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <script src="{{ url_for('static', path='js/create_order.js') }}"></script>
+  <script type="module" src="{{ url_for('static', path='js/create_order.js') }}"></script>
 
   <h2>Create Order</h2>
 
@@ -14,22 +14,37 @@
     <label>Name</label><br>
     <input type="text" name="customer_name" required>
 
-    <br><br>
+    <br>
 
     <label>Email</label><br>
-    <input type="email" name="customer_email" required>
+    <input
+      type="email"
+      name="customer_email"
+      list="customer-emails"
+      required
+    >
 
-    <br><br>
+    <datalist id="customer-emails">
+      {% for customer in customers %}
+        <option
+          value="{{ customer.email }}"
+          data-name="{{ customer.name }}"
+          data-phone="{{ customer.phone or '' }}"
+        ></option>
+      {% endfor %}
+    </datalist>
+
+    <br>
 
     <label>Phone</label><br>
     <input type="text" name="customer_phone" required>
 
-    <br><br>
+    <br>
 
     <label>Customer Notes</label><br>
     <textarea name="customer_notes" rows="3"></textarea>
 
-    <br><br>
+    <br>
 
     <!-- Order Info -->
     <h3>Order Details</h3>
@@ -40,11 +55,23 @@
       <option value="bw">Black & White</option>
     </select>
 
-    <br><br>
+    <br>
+
+    <label>Quantity</label><br>
+    <input
+      type="number"
+      name="quantity"
+      value="1"
+      min="1"
+      max="100"
+      required
+    >
+
+    <br>
 
     <label>
       <input type="checkbox" name="needs_print" value="true">
-      Needs Print
+      <strong>Needs Print</strong>
     </label>
 
     <br><br>
@@ -52,7 +79,7 @@
     <label>Notes</label><br>
     <textarea name="notes" rows="5"></textarea>
 
-    <br><br>
+    <br>
 
     <button class="btn" type="submit">Create Order</button>
   </form>

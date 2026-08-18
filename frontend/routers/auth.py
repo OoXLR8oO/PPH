@@ -8,13 +8,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.database import get_db
 from api.limiter import limiter
 from api.models import User
-from api.security.backend_auth import DUMMY_PASSWORD_HASH, verify_password
 from api.security.jwt_auth import (
     create_access_token,
     create_refresh_token,
     get_current_user,
     get_user_from_refresh_token,
 )
+from api.security.password import DUMMY_PASSWORD_HASH, verify_password
 from api.services.auth import get_user_by_username, rotate_refresh_token
 
 FAILURE_DELAY = 0.3

@@ -28,6 +28,24 @@ async def get_index_data(view: str, search: str | None, db: AsyncSession):
 
         context["customers"] = result.scalars().all()
 
+    elif view == "batches":
+        stmt = select(models.Batch).options(
+            joinedload(models.Batch.customer),
+            joinedload(models.Batch.orders),
+        )
+
+        if search:
+            stmt = stmt.join(models.Batch.customer).where(
+                (models.Batch.batch_code.ilike(f"%{search}%"))
+                | (models.Customer.name.ilike(f"%{search}%"))
+                | (models.Customer.email.ilike(f"%{search}%"))
+            )
+
+        stmt = stmt.order_by(models.Batch.id.desc())
+        result = await db.execute(stmt)
+
+        context["batches"] = result.unique().scalars().all()
+
     else:
         stmt = select(models.Order).options(joinedload(models.Order.customer))
 
@@ -65,3 +83,15 @@ async def get_customer_edit_page(customer_id: int, db: AsyncSession):
     customer = result.scalars().first()
 
     return customer
+
+
+async def get_batch_edit_page(batch_id: int, db: AsyncSession):
+    stmt = (
+        select(models.Batch)
+        .options(joinedload(models.Batch.customer))
+        .where(models.Batch.id == batch_id)
+    )
+
+    result = await db.execute(stmt)
+
+    return result.scalar_one_or_none()

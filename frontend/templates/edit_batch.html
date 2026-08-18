@@ -1,0 +1,48 @@
+<!-- edit_batch.html -->
+{% extends "base.html" %}
+
+{% block content %}
+  <script type="module" src="{{ url_for('static', path='js/edit_batch.js') }}"></script>
+
+  <h2>Edit Batch {{ batch.batch_code }}</h2>
+
+  <form id="edit-form" data-batch-id="{{ batch.id }}">
+
+    <p><strong>Batch Code:</strong> {{ batch.batch_code }}</p>
+    <p><strong>Customer:</strong> {{ batch.customer.name }}</p>
+    <p><strong>Email:</strong> {{ batch.customer.email }}</p>
+
+    <br>
+
+    <!-- Dropbox Link -->
+    <label><strong>Dropbox Link:</strong></label><br>
+    <input
+      type="url"
+      name="dropbox_link"
+      class="dropbox-input"
+      value="{{ batch.dropbox_link or '' }}"
+    >
+
+    <br><br>
+
+    <button class="btn" type="submit">Save</button>
+
+    <br><br>
+
+    <button
+      type="button"
+      id="delete-btn"
+      data-batch-id="{{ batch.id }}"
+      class="btn btn-delete"
+    >
+      Delete Batch
+    </button>
+
+  </form>
+
+  <br>
+
+  <a href="{{ url_for('index') }}?view=batches" class="btn clear-btn">
+    Back
+  </a>
+{% endblock %}

@@ -9,7 +9,7 @@ from slowapi.errors import RateLimitExceeded
 
 from api.database import engine
 from api.limiter import limiter
-from api.routers import customers, orders
+from api.routers import batches, customers, orders
 from api.security.jwt_auth import get_current_user
 from api.security.middleware import SecurityHeadersMiddleware
 from frontend.routers import auth, pages
@@ -58,7 +58,9 @@ api_router = APIRouter(
 
 api_router.include_router(customers.router)
 api_router.include_router(orders.router)
+api_router.include_router(batches.router)
 
 app.include_router(api_router)
 app.include_router(pages.router)
 app.include_router(auth.router)
+app.include_router(batches.router)

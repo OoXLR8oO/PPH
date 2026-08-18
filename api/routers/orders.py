@@ -47,7 +47,7 @@ async def get_order(
     return order
 
 
-@router.post("", response_model=schemas.OrderResponse)
+@router.post("", response_model=schemas.BatchResponse)
 @limiter.limit("60/minute")
 async def create_order(
     request: Request,

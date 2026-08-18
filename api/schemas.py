@@ -1,7 +1,15 @@
 # api/schemas.py
 from datetime import UTC, datetime
 
-from pydantic import BaseModel, ConfigDict, EmailStr, field_serializer, field_validator
+from pydantic import (
+    AnyHttpUrl,
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    field_serializer,
+    field_validator,
+)
 from pytz import timezone
 
 from api.enums import FilmType, OrderStatus
@@ -45,6 +53,7 @@ class OrderCreate(BaseModel):
     customer: CustomerCreate
     film_type: FilmType
     needs_print: bool
+    quantity: int = Field(default=1, ge=1, le=100)
     notes: str | None = None
 
 
@@ -67,6 +76,17 @@ class OrderResponse(BaseModel):
         return local_time.strftime("%d-%m-%Y %H:%M:%S")
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class BatchResponse(BaseModel):
+    batch_code: str | None
+    orders: list[OrderResponse]
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BatchUpdate(BaseModel):
+    dropbox_link: AnyHttpUrl | None = None
 
 
 class OrderUpdate(BaseModel):

@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database import get_db
 from api.limiter import limiter
+from api.services import customers as customers_service
 from api.services import pages
 from frontend.templates_config import templates
 
@@ -63,12 +64,21 @@ async def edit_order_page(
 @limiter.limit("60/minute")
 async def create_order_page(
     request: Request,
+    db: AsyncSession = Depends(get_db),
 ):
+    customers = await customers_service.list_customers(
+        email=None,
+        skip=0,
+        limit=10,
+        db=db,
+    )
+
     return templates.TemplateResponse(
         request=request,
         name="create_order.html",
         context={
             "request": request,
+            "customers": customers,
         },
     )
 
@@ -94,6 +104,31 @@ async def edit_customer_page(
         context={
             "request": request,
             "customer": customer,
+        },
+    )
+
+
+@router.get("/batches/{batch_id}/edit", response_class=HTMLResponse)
+@limiter.limit("60/minute")
+async def edit_batch_page(
+    request: Request,
+    batch_id: int,
+    db=Depends(get_db),
+):
+    batch = await pages.get_batch_edit_page(batch_id, db)
+
+    if not batch:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Batch not found",
+        )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="edit_batch.html",
+        context={
+            "request": request,
+            "batch": batch,
         },
     )
 

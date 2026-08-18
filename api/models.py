@@ -37,7 +37,7 @@ class User(Base):
 class Customer(Base):
     __tablename__ = "customers"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     email: Mapped[str] = mapped_column(String, nullable=False, unique=True, index=True)
     phone: Mapped[str] = mapped_column(String, nullable=False)
@@ -45,6 +45,12 @@ class Customer(Base):
 
     orders: Mapped[list[Order]] = relationship(
         "Order", back_populates="customer", cascade="all, delete-orphan"
+    )
+
+    batches: Mapped[list[Batch]] = relationship(
+        "Batch",
+        back_populates="customer",
+        cascade="all, delete-orphan",
     )
 
     @validates("email")
@@ -82,3 +88,38 @@ class Order(Base):
     )
 
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    batch_id: Mapped[int | None] = mapped_column(
+        ForeignKey("batches.id", name="fk_orders_batch_id_batches", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )
+
+    batch: Mapped[Batch] = relationship(back_populates="orders")
+
+
+class Batch(Base):
+    __tablename__ = "batches"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    batch_code: Mapped[str] = mapped_column(String, unique=True, nullable=True)
+    dropbox_link: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    orders: Mapped[list[Order]] = relationship(
+        back_populates="batch",
+        cascade="all, delete-orphan",
+    )
+
+    customer_id: Mapped[int] = mapped_column(
+        ForeignKey("customers.id"),
+        nullable=False,
+        index=True,
+    )
+
+    customer: Mapped[Customer] = relationship(back_populates="batches")
