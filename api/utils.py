@@ -35,13 +35,18 @@ async def get_next_order_codes(
 
     used = {int(code) for code in result.scalars() if code.isdigit()}
 
-    codes = []
+    consecutive = 0
+    start = 0
 
     for i in range(10000):
-        if i not in used:
-            codes.append(f"{i:04d}")
+        if i in used:
+            consecutive = 0
+            start = i + 1
+            continue
 
-            if len(codes) == quantity:
-                return codes
+        consecutive += 1
+
+        if consecutive == quantity:
+            return [f"{code:04d}" for code in range(start, i + 1)]
 
     raise ValueError("Not enough available order codes")
