@@ -35,7 +35,7 @@ dev = [
 [tool.ruff]
 line-length = 88
 target-version = "py313"
-exclude = ["frontend/templates"]
+exclude = ["alembic/", "frontend/templates"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
