@@ -6,6 +6,7 @@ from sqlalchemy.orm import joinedload
 
 from api import models, schemas
 from api.enums import OrderStatus
+from api.services import batches
 from api.utils import generate_batch_code, get_next_order_codes
 
 
@@ -147,13 +148,32 @@ async def update_order(
     return order
 
 
-async def delete_order(order_code: str, db: AsyncSession):
+async def delete_order(
+    order_code: str,
+    db: AsyncSession,
+):
     order = await get_order_by_code(order_code, db)
 
     if not order:
         return None
 
+    batch_id = order.batch_id
+
     await db.delete(order)
+    await db.flush()
+
+    if batch_id:
+        result = await db.execute(
+            select(models.Order.id).where(models.Order.batch_id == batch_id).limit(1)
+        )
+
+        if result.scalar_one_or_none() is None:
+            await batches.delete_batch(
+                batch_id,
+                db,
+                commit=False,
+            )
+
     await db.commit()
 
     return order

@@ -30,6 +30,7 @@ async def update_batch(
 async def delete_batch(
     batch_id: int,
     db: AsyncSession,
+    commit: bool = True,
 ):
     stmt = select(models.Batch).where(models.Batch.id == batch_id)
 
@@ -40,6 +41,8 @@ async def delete_batch(
         return False
 
     await db.delete(batch)
-    await db.commit()
+
+    if commit:
+        await db.commit()
 
     return True
