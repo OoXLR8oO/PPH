@@ -63,6 +63,14 @@ async def get_index_data(view: str, search: str | None, db: AsyncSession):
     return context
 
 
+async def get_order_create_page(db: AsyncSession):
+    stmt = select(models.Customer).order_by(models.Customer.email)
+
+    result = await db.execute(stmt)
+
+    return result.scalars().all()
+
+
 async def get_order_edit_page(order_code: str, db: AsyncSession):
     stmt = (
         select(models.Order)

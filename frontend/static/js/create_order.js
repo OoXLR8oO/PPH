@@ -16,7 +16,11 @@ document.addEventListener("DOMContentLoaded", () => {
       (option) => option.value.toLowerCase() === email
     );
 
-    if (!option) return;
+    if (!option) {
+      form.customer_name.value = "";
+      form.customer_phone.value = "";
+      return;
+    }
 
     form.customer_name.value = option.dataset.name;
     form.customer_phone.value = option.dataset.phone;
@@ -34,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
       film_type: form.film_type.value,
       quantity: Number(form.quantity.value),
       needs_print: form.needs_print.checked,
-      notes: null,
+      notes: form.notes.value || null,
     };
 
     const res = await apiFetch("/api/orders", {

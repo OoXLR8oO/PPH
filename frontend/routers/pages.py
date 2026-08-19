@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database import get_db
 from api.limiter import limiter
-from api.services import customers as customers_service
 from api.services import pages
 from frontend.templates_config import templates
 
@@ -66,12 +65,7 @@ async def create_order_page(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    customers = await customers_service.list_customers(
-        email=None,
-        skip=0,
-        limit=10,
-        db=db,
-    )
+    customers = await pages.get_order_create_page(db)
 
     return templates.TemplateResponse(
         request=request,
