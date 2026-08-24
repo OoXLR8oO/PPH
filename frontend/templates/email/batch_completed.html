@@ -1,0 +1,78 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}
+  Order Ready
+{% endblock %}
+
+{% block header %}
+  Your Order Is Ready
+{% endblock %}
+
+{% block content %}
+
+  <p>
+    Hello {{ customer.name }},
+  </p>
+
+  <p>
+    Your order has been processed and is now ready.
+  </p>
+
+  <div class="email-section">
+
+    <h3>Order Details</h3>
+
+    <table class="email-table">
+      <tr>
+        <th>Order Code</th>
+        <td>{{ order.order_code }}</td>
+      </tr>
+
+      <tr>
+        <th>Film Type</th>
+        <td>{{ order.film_type }}</td>
+      </tr>
+
+      <tr>
+        <th>Quantity</th>
+        <td>{{ quantity }}</td>
+      </tr>
+
+      <tr>
+        <th>Print</th>
+        <td>
+          {% if order.needs_print %}
+            Yes
+          {% else %}
+            No
+          {% endif %}
+        </td>
+      </tr>
+    </table>
+
+  </div>
+
+  <div class="email-section">
+
+    <h3>Your Photos</h3>
+
+    <p>
+      Your processed photos are available at the following link:
+    </p>
+
+    <p>
+      <a
+        href="{{ batch.dropbox_link }}"
+        class="email-link"
+      >
+        View your photos
+      </a>
+    </p>
+
+  </div>
+
+  <p>
+    Thank you for choosing us.
+  </p>
+
+{% endblock %}

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>{% block title %}PPH{% endblock %}</title>
+
+  <link
+    rel="stylesheet"
+    href="{{ request.base_url }}static/css/email.css"
+  >
+</head>
+
+<body class="email-body">
+
+  <div class="email-container">
+
+    <header class="email-header">
+      <h2>{% block header %}PPH{% endblock %}</h2>
+    </header>
+
+    <main class="email-content">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="email-footer">
+      This is an automated email from PPH. Please do not reply.
+    </footer>
+
+  </div>
+
+</body>
+</html>

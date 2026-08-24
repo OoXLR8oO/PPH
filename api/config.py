@@ -18,5 +18,8 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_seconds: int = 15
 
+    email_addr: str
+    email_pass: str
+
 
 settings = Settings()  # type: ignore[call-arg] # Loaded from .env file

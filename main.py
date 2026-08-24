@@ -54,6 +54,7 @@ app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
 api_router = APIRouter(
     prefix="/api",
     dependencies=[Depends(get_current_user)],
+    tags=["API"],
 )
 
 api_router.include_router(customers.router)
@@ -63,4 +64,4 @@ api_router.include_router(batches.router)
 app.include_router(api_router)
 app.include_router(pages.router)
 app.include_router(auth.router)
-app.include_router(batches.router)
+app.include_router(batches.router) 
